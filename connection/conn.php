@@ -3,7 +3,7 @@
 $servername = "localhost";          // Change to your hosting DB server
 $username   = "lexputjd_ngs";   // Your hosting DB username
 $password   = "olivengs2025";   // Your hosting DB password
-$dbname     = "lexputjd_olivemate";       // Your hosting database name
+$dbname     = "lexputjd_ng";       // Your hosting database name
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
