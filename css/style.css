@@ -2,15 +2,15 @@
    GLOBAL STYLES
 ------------------------- */
 :root {
-    --primary-green: #4C6B22; /* Greenish */
-    --secondary-brown: #8B4513; /* Brownish */
-    --accent-red: #D9534F;     /* Touch of red */
-    --dark-color: #222;
-    --light-color: #fff;
-    --text-color: #555;
-    --light-bg: #f9f9f9;
-    --border-color: #eee;
-    --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    --primary-green: #4e5638;      /* Updated from --c-green-dark */
+    --secondary-brown: #4a4033;    /* Updated from --c-brown */
+    --accent-red: #D9534F;         /* Kept original */
+    --dark-color: #4a4033;         /* Updated from --c-brown */
+    --light-color: #fff;           /* Kept original */
+    --text-color: #333;            /* Updated from --c-text */
+    --light-bg: #F3F6E5;           /* Updated from --c-mainbg */
+    --border-color: #dee2e6;       /* Updated from --c-border */
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Kept original */
     
     --font-heading: 'Playfair Display', serif;
     --font-body: 'Poppins', sans-serif;
@@ -26,7 +26,7 @@ body {
     font-family: var(--font-body);
     color: var(--text-color);
     line-height: 1.6;
-    background-color: var(--light-color);
+    background-color: var(--light-bg);
 }
 
 html {

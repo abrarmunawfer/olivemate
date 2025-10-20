@@ -11,6 +11,33 @@ if (empty($_SESSION['cart'])) {
 include 'includes/header.php';
 ?>
 
+<style>
+    /* ---
+   Responsive Checkout Page
+   --- */
+
+@media (max-width: 992px) {
+    .checkout-container {
+        /* Stack to one column on medium screens and below */
+        grid-template-columns: 1fr;
+        gap: 30px; /* Reduce gap slightly */
+    }
+}
+
+@media (max-width: 768px) {
+    /* Further adjustments for small screens if needed */
+    .order-summary, .payment-form {
+        padding: 20px; /* Reduce padding slightly */
+    }
+    .summary-total {
+        font-size: 1.1rem; /* Slightly smaller total font */
+    }
+    .auth-btn { /* Make button consistent with login/register */
+         padding: 12px;
+         font-size: 0.95rem;
+    }
+}
+</style>
 <main class="section-padding">
     <div class="container">
         <h2 class="section-title">Checkout</h2>
