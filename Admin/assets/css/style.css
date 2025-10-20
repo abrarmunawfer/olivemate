@@ -1,0 +1,431 @@
+/* ---
+   Color Variables & Core Setup
+   --- */
+:root {
+    --c-green-dark: #4e5638;
+    --c-green-light: #94a166;
+    --c-mainbg: #F3F6E5;
+    --c-beige: #e8e3de;
+    --c-brown: #4a4033;
+    --c-text: #333;
+    --c-border: #dee2e6;
+    --sidebar-width: 260px;
+    --sidebar-bg: var(--c-green-dark);
+    --sidebar-text: #f8f9fa;
+    --sidebar-hover: var(--c-brown);
+    --c-green-light-rgba: rgba(148, 161, 102, 0.08); 
+    --c-green-light-hover-rgba: rgba(148, 161, 102, 0.15);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--c-mainbg);
+    font-size: 14px;
+    color: var(--c-text);
+}
+
+.page-title {
+    color: var(--c-brown);
+    font-weight: 700;
+}
+
+/* ---
+   Sidebar
+   --- */
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 15px;
+    transition: margin-left 0.3s ease-in-out;
+    z-index: 1030;
+    overflow-y: auto;
+}
+
+.sidebar-header {
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-brand {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sidebar-brand:hover {
+    color: var(--c-green-light);
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding-left: 0;
+}
+
+.sidebar-item {
+    margin-bottom: 5px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-link:hover,
+.sidebar-link[aria-expanded="true"] {
+    background-color: var(--sidebar-hover);
+    color: #fff;
+}
+
+.sidebar-link i {
+    font-size: 1.1rem;
+    margin-right: 15px;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-link .arrow {
+    transition: transform 0.2s ease;
+}
+
+.sidebar-link[aria-expanded="true"] .arrow {
+    transform: rotate(180deg);
+}
+
+.sidebar-dropdown {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 5px;
+}
+.sidebar-dropdown-item .sidebar-link {
+    padding-left: 50px; /* Indent sub-items */
+    font-size: 0.9rem;
+}
+
+/* ---
+   Main Content & Top Navbar
+   --- */
+.main-content {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.navbar {
+    background-color: #fff !important;
+}
+
+/* ---
+   Responsive: Sidebar Collapse
+   --- */
+@media (max-width: 991.98px) {
+    .sidebar {
+        margin-left: calc(-1 * var(--sidebar-width));
+    }
+    .sidebar.active {
+        margin-left: 0;
+    }
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* ---
+   Floating Add Button
+   --- */
+.btn-float {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--c-green-dark);
+    border-color: var(--c-green-dark);
+    color: #fff;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1020;
+    transition: all 0.2s ease;
+}
+.btn-float:hover {
+    background-color: var(--c-green-light);
+    border-color: var(--c-green-light);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* ---
+   Dashboard Stat Cards
+   --- */
+.stat-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+.stat-card .card-title {
+    font-size: 1rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+.stat-card .stat-number {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--c-brown);
+}
+.stat-card .stat-icon {
+    font-size: 2rem;
+    padding: 15px;
+    border-radius: 50%;
+    background-color: var(--icon-bg, var(--c-green-light));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+}
+
+/* ---
+   Category & Menu Item Cards
+   --- */
+.item-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.item-card-img-top {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px 12px 0 0;
+}
+
+.item-card .card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-card .card-title {
+    font-weight: 600;
+    color: var(--c-brown);
+}
+
+.item-card .item-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--c-green-dark);
+}
+
+.item-card .card-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    flex-grow: 1;
+}
+
+.item-card .card-footer {
+    background-color: #fff;
+    border-top: 1px solid var(--c-border);
+    border-radius: 0 0 12px 12px;
+    padding: 10px 15px;
+}
+
+.badge.status-active,
+.badge.status-available {
+    background-color: var(--c-green-light) !important;
+    color: #fff;
+}
+.badge.status-inactive,
+.badge.status-unavailable {
+    background-color: #6c757d !important;
+    color: #fff;
+}
+.badge.status-popular {
+    background-color: #fd7e14 !important;
+}
+.badge.status-special {
+    background-color: #dc3545 !important;
+}
+
+/* ---
+   Form & Modal Styling
+   --- */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--c-green-light);
+    box-shadow: 0 0 0 0.25rem rgba(148, 161, 102, 0.25);
+}
+
+.btn-primary {
+    background-color: var(--c-green-dark);
+    border-color: var(--c-green-dark);
+}
+.btn-primary:hover {
+    background-color: var(--c-green-light);
+    border-color: var(--c-green-light);
+}
+
+/* Form Switch Toggles */
+.form-switch.form-check-lg {
+    font-size: 1.1rem;
+}
+.form-switch .form-check-input {
+    width: 2.5em;
+    height: 1.25em;
+    cursor: pointer;
+}
+.form-switch .form-check-input:checked {
+    background-color: var(--c-green-dark);
+    border-color: var(--c-green-dark);
+}
+
+
+/*DataTable Container Fix (Remove White Card BG)*/
+
+.card:has(.dataTables_wrapper) {
+    background-color: transparent;
+    border: none;
+    box-shadow: none !important; 
+}
+
+.card:has(.dataTables_wrapper) .card-body {
+    padding: 0;
+}
+
+.dataTables_wrapper {
+    font-size: 14px;
+}
+
+.table {
+    font-size: 14px;
+}
+
+.table thead th {
+    background-color: var(--c-green-dark); 
+    color: #fff;
+    font-weight: 600;
+    border-color: var(--c-green-dark);
+}
+
+.table tbody tr {
+    background-color: var(--c-green-light-rgba); 
+    border-color: var(--c-green-light-rgba);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--c-green-light-rgba);
+    box-shadow: inset 0 0 0 9999px var(--c-green-light-rgba); 
+}
+
+.table-striped > tbody > tr:nth-of-type(even) > * {
+    background-color: var(--c-beige);
+    box-shadow: inset 0 0 0 9999px var(--c-beige);
+}
+
+.table-hover > tbody > tr:hover > * {
+    background-color: var(--c-green-light-hover-rgba);
+    box-shadow: inset 0 0 0 9999px var(--c-green-light-hover-rgba);
+    color: var(--c-brown);
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+.dataTables_wrapper .dataTables_length select:focus,
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: var(--c-green-light);
+    box-shadow: 0 0 0 0.25rem rgba(148, 161, 102, 0.25);
+}
+
+.page-item.active .page-link {
+    background-color: var(--c-green-dark);
+    border-color: var(--c-green-dark);
+}
+
+.page-link {
+    color: var(--c-green-dark);
+    font-size: 14px;
+}
+
+.page-link:hover {
+    color: var(--c-green-light);
+}
+
+/* ---
+   Custom Scrollbar Styling (for .table-responsive)
+   --- */
+.table-responsive::-webkit-scrollbar {
+    width: 8px;  /* Width of vertical scrollbar */
+    height: 8px; /* Height of horizontal scrollbar */
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05); /* Light track */
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background-color: var(--c-green-light); /* Your light green */
+    border-radius: 10px;
+    border: 2px solid var(--c-beige); /* Creates a nice padding effect */
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background-color: var(--c-green-dark); /* Darker green on hover */
+}
+
+/* ---
+   Navbar Info Styling (Clock & User Welcome)
+   --- */
+.navbar-info {
+    color: var(--c-brown);
+}
+
+.navbar-info .fw-bold {
+    font-size: 1rem;
+    color: var(--c-text);
+}
+
+.navbar-info span {
+    font-size: 0.95rem;
+}
+
+.navbar-info i {
+    color: var(--c-green-dark);
+}

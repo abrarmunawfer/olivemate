@@ -1,222 +1,104 @@
-<?php 
-include '../includes/session.php'; // session check (if login system exists)
-include '../backend/menu_functions.php'; // backend functions
+<?php
+// Include and run session check
+include 'includes/session.php';
+check_login(); // Redirect to index.php if not logged in
 
-// Handle form submissions
-$msg = "";
-
-if(isset($_POST['add'])) {
-    $name = $_POST['name'];
-    $description = $_POST['description'];
-    $category = $_POST['category'];
-    $price = $_POST['price'];
-    
-    // Handle image upload
-    $image = "";
-    if(isset($_FILES['image']) && $_FILES['image']['error'] == 0){
-        $targetDir = "../uploads/";
-        if(!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-        $image = $targetDir . basename($_FILES['image']['name']);
-        move_uploaded_file($_FILES['image']['tmp_name'], $image);
-    }
-
-    if(addMenuItem($name, $description, $category, $price, $image)){
-        $msg = "Menu item added successfully!";
-    } else {
-        $msg = "Error adding menu item!";
-    }
-}
-
-// Fetch all menu items
-$menuItems = fetchMenuItems();
+// Include the header
+include 'includes/header.php';
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Menu Management</title>
-    <style>
- 
-        :root {
-            --dark-brown: #2C0E0E;
-            --lime-green: #B9F60D;
-            --cream: #F6DCA1;
-            --soft-green: #C8E05A;
-            --white: #ffffff;
-        }
+<button class="btn btn-primary btn-float" id="add-menu-btn" title="Add New Menu Item">
+    <i class="bi bi-plus-lg"></i>
+</button>
 
-        body {
-            font-family: "Poppins", sans-serif;
-            background-color: #FFF9F0;
-            color: var(--dark-brown);
-            margin: 0;
-            padding: 0;
-        }
-
-        h2, h3 {
-            text-align: center;
-            color: var(--dark-brown);
-        }
-
-        p {
-            text-align: center;
-            background: var(--soft-green);
-            color: var(--dark-brown);
-            font-weight: 500;
-            width: 50%;
-            margin: 10px auto;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        form {
-            background: var(--white);
-            padding: 20px;
-            border-radius: 12px;
-            width: 60%;
-            margin: 20px auto;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        form input[type="text"],
-        form input[type="number"],
-        form input[type="file"],
-        form textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 8px;
-            border: 1px solid var(--soft-green);
-            outline: none;
-        }
-
-        form button {
-            background: var(--lime-green);
-            color: var(--dark-brown);
-            font-weight: bold;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        form button:hover {
-            background: var(--soft-green);
-            transform: scale(1.05);
-        }
-
-        table {
-            width: 90%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            background: var(--white);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
-
-        table th, table td {
-            padding: 12px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-
-        table th {
-            background: var(--dark-brown);
-            color: var(--cream);
-        }
-
-        table tr:hover {
-            background-color: #f8f8f8;
-        }
-
-        table img {
-            border-radius: 8px;
-        }
-
-        a {
-            color: var(--lime-green);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        a:hover {
-            color: var(--dark-brown);
-            text-decoration: underline;
-        }
-
-        /* Page Wrapper */
-        .container {
-            padding: 20px;
-        }
-
-        @media (max-width: 768px) {
-            form, table {
-                width: 95%;
-            }
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-<h2>Olive Mate Admin Menu Management</h2>
-
-<?php if($msg != "") echo "<p>$msg</p>"; ?>
-
-<!-- Add Menu Form -->
-<h3>Add New Menu Item</h3>
-<form method="POST" enctype="multipart/form-data">
-    <label>Name:</label>
-    <input type="text" name="name" required>
-
-    <label>Description:</label>
-    <textarea name="description"></textarea>
-
-    <label>Category:</label>
-    <input type="text" name="category">
-
-    <label>Price:</label>
-    <input type="number" step="0.01" name="price" required>
-
-    <label>Image:</label>
-    <input type="file" name="image">
-
-    <button type="submit" name="add">Add Menu Item</button>
-</form>
-
-<!-- Menu Items Table -->
-<h3>Existing Menu Items</h3>
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Category</th>
-        <th>Price</th>
-        <th>Image</th>
-        <th>Created At</th>
-        <th>Updated At</th>
-        <th>Actions</th>
-    </tr>
-    <?php foreach($menuItems as $item): ?>
-    <tr>
-        <td><?= $item['id'] ?></td>
-        <td><?= $item['name'] ?></td>
-        <td><?= $item['description'] ?></td>
-        <td><?= $item['category'] ?></td>
-        <td>Rs. <?= number_format($item['price'], 2) ?></td>
-        <td><?php if($item['image'] != "") echo "<img src='../" . $item['image'] . "' width='50'>"; ?></td>
-        <td><?= $item['created_at'] ?></td>
-        <td><?= $item['updated_at'] ?></td>
-        <td>
-            <a href="edit_menu.php?id=<?= $item['id'] ?>">Edit</a> |
-            <a href="delete_menu.php?id=<?= $item['id'] ?>" onclick="return confirm('Are you sure?')">Delete</a>
-        </td>
-    </tr>
-    <?php endforeach; ?>
-</table>
+<div class="d-flex justify-content-between align-items-center mb-4">
 </div>
 
-</body>
-</html>
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4" id="menu-list">
+    </div>
+
+<div class="modal fade" id="menuModal" tabindex="-1" aria-labelledby="menuModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="menuModalLabel">Add Menu Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="menu-form" enctype="multipart/form-data">
+                <div class="modal-body">
+                    
+                    <input type="hidden" name="action" id="menu-action" value="add_menu">
+                    <input type="hidden" name="menu_id" id="menu-id" value="">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="menu-name" class="form-label">Item Name</label>
+                                <input type="text" class="form-control" id="menu-name" name="name" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="menu-category" class="form-label">Category</label>
+                                <select class="form-select" id="menu-category" name="category_id" required>
+                                    <option value="">Loading categories...</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="menu-price" class="form-label">Price ($)</label>
+                                <input type="number" class="form-control" id="menu-price" name="price" step="0.01" min="0" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="menu-status" class="form-label">Status</label>
+                                <select class="form-select" id="menu-status" name="status" required>
+                                    <option value="available">Available</option>
+                                    <option value="unavailable">Unavailable</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="menu-image" class="form-label">Item Image</label>
+                                <input class="form-control" type="file" id="menu-image" name="image" accept="image/jpeg, image/png, image/gif, image/webp">
+                            </div>
+                            
+                            <div class="mb-3 text-center">
+                                <img id="menu-image-preview" src="assets/images/placeholder.png" alt="Image Preview" class="img-thumbnail" style="max-height: 200px; display: none;">
+                            </div>
+                            
+                            <div class="d-flex justify-content-around mt-4">
+                                <div class="form-check form-switch form-check-lg">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="is-popular" name="is_popular" value="1">
+                                    <label class="form-check-label" for="is-popular">Popular?</label>
+                                </div>
+                                <div class="form-check form-switch form-check-lg">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="is-special" name="is_special" value="1">
+                                    <label class="form-check-label" for="is-special">Special?</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="menu-description" class="form-label">Description</label>
+                        <textarea class="form-control" id="menu-description" name="description" rows="3"></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="menu-submit-btn">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<?php
+// Include the footer
+include 'includes/footer.php';
+?>
+
+<script src="assets/js/menu.js"></script>
