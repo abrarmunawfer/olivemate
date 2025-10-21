@@ -44,6 +44,11 @@
                 <span>Session Management</span>
             </a>
         </li>
-        
+        <li class="sidebar-item">
+            <a href="company_profile.php" class="sidebar-link">
+                <i class="bi bi-buildings-fill"></i>
+                <span>Company Profile</span>
+            </a>
+        </li>        
         </ul>
 </div>

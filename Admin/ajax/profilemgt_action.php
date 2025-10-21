@@ -2,7 +2,12 @@
 include '../includes/session.php';
 check_login('../index.php');
 
-
+// ADDED: Check if the connection variable is available and valid
+if (!isset($conn) || $conn->connect_error) {
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'error', 'message' => 'Database connection failed.']);
+    exit();
+}
 
 header('Content-Type: application/json');
 $response = ['status' => 'error', 'message' => 'Invalid request.'];
@@ -40,11 +45,12 @@ if (isset($_POST['action']) && $_POST['action'] == 'force_logout') {
     $stmt->bind_param("i", $session_id_to_logout);
     
     if ($stmt->execute()) {
-
+        
+        // Check if the current user logged themselves out
         if ($session_id_to_logout == $current_session_db_id) {
-            session_unset();
-            session_destroy();
-            $response = ['status' => 'self_logout', 'message' => 'You have logged out your own session.'];
+            // Do NOT unset/destroy the session here. The check in session.php on the next page load will handle it.
+            // We just need to signal the JavaScript to redirect.
+            $response = ['status' => 'self_logout', 'message' => 'You have logged out your own session. You will be redirected.'];
         } else {
             $response = ['status' => 'success', 'message' => 'Session logged out successfully.'];
         }

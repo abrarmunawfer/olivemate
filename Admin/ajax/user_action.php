@@ -1,10 +1,19 @@
 <?php
+// Include session and DB connection
 include '../includes/session.php';
-check_login('../index.php');
+
+// ADDED: Check if the connection variable is available and valid
+if (!isset($conn) || $conn->connect_error) {
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'error', 'message' => 'Database connection failed.']);
+    exit();
+}
 
 header('Content-Type: application/json');
+
 $response = ['status' => 'error', 'message' => 'Invalid request.'];
-$current_user_id = $_SESSION['user_id'];
+
+// ... (rest of the file remains the same) ...
 
 // ======== FETCH ALL USERS (Admin/Staff) ========
 if (isset($_POST['action']) && $_POST['action'] == 'fetch_all') {

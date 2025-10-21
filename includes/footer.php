@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 OliveMate. All Rights Reserved. Designed by You.</p>
+                <p>&copy; 2025 OliveMate. All Rights Reserved. Designed by Nexlance Global Solutions.</p>
             </div>
         </div>
     </footer>
