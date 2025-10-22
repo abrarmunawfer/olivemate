@@ -82,23 +82,37 @@ if (isset($_POST['action'])) {
                     $location = "Location data unavailable"; // Default
 
                     // --- IP Geolocation ---
-                    try {
-                        if ($ip_address != '127.0.0.1' && $ip_address != '::1') {
-                            $geo_data_json = @file_get_contents("http://ip-api.com/json/{$ip_address}?fields=country,regionName,city");
-                            if ($geo_data_json) {
-                                $geo_data = json_decode($geo_data_json);
-                                if ($geo_data && $geo_data->status == 'success') {
-                                    $location_full = implode(', ', array_filter([$geo_data->city, $geo_data->regionName, $geo_data->country]));
-                                    // === FIX 2: Truncate location string to 255 to prevent errors ===
-                                    $location = substr($location_full, 0, 255);
-                                }
-                            }
-                        } elseif ($ip_address == '127.0.0.1' || $ip_address == '::1') {
-                            $location = "Localhost";
-                        }
-                    } catch (Exception $e) {
-                        // API call failed, location remains "unavailable"
-                    }
+try {
+    if ($ip_address != '127.0.0.1' && $ip_address != '::1') {
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "http://ip-api.com/json/{$ip_address}?fields=country,regionName,city");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Set a 5-second timeout
+        
+        $geo_data_json = curl_exec($ch);
+        
+        if (curl_errno($ch)) {
+            // Log the cURL error if the request fails
+            error_log("cURL Geolocation Error: " . curl_error($ch) . " for IP: " . $ip_address);
+        }
+        
+        curl_close($ch);
+        
+        if ($geo_data_json) {
+            $geo_data = json_decode($geo_data_json);
+            if ($geo_data && property_exists($geo_data, 'status') && $geo_data->status == 'success') {
+                $location_full = implode(', ', array_filter([$geo_data->city, $geo_data->regionName, $geo_data->country]));
+                // FIX: Truncate location string to 255
+                $location = substr($location_full, 0, 255); 
+            }
+        }
+    } elseif ($ip_address == '127.0.0.1' || $ip_address == '::1') {
+        $location = "Localhost";
+    }
+} catch (Exception $e) {
+    error_log("Geolocation Exception: " . $e->getMessage());
+}
                     // --- END ---
 
                     // UPDATED INSERT QUERY
