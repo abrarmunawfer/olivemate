@@ -11,7 +11,7 @@
         <div class="container">
             <div class="about-info-grid">
                 <div class="about-info-image">
-                    <img src="https://i.pinimg.com/564x/1a/0a/f6/1a0af6cb94f86f7f6f5005d8b78d6b8a.jpg" alt="Restaurant Interior">
+                    <img src="assets/about.jpg" alt="Restaurant Interior">
                 </div>
                 <div class="about-info-content">
                     <h2 class="section-title" style="text-align: left; margin: 0 0 20px 0;">Our Story</h2>
@@ -109,4 +109,4 @@
 }
 </style>
 
-<?php include 'include/footer.php'; ?>
+<?php include 'includes/footer.php'; ?>

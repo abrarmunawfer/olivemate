@@ -50,7 +50,7 @@ $items_result = $conn->query($sql);
                     <?php while($item = $items_result->fetch_assoc()): ?>
                         <?php if($category_id > 0): // Displaying foods ?>
                             <div class="food-card">
-                                <img src="<?php echo htmlspecialchars($item['image_path'] ?? $placeholder_img); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
+                                <img src="<?php echo htmlspecialchars('Admin/' . ($item['image_path'] ?? $placeholder_img)); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
                                 <div class="food-card-content">
                                     <h4><?php echo htmlspecialchars($item['name']); ?></h4>
                                     <div class="price">$<?php echo htmlspecialchars($item['price']); ?></div>
@@ -63,7 +63,7 @@ $items_result = $conn->query($sql);
                             </div>
                         <?php else: // Displaying categories ?>
                              <a href="category.php?id=<?php echo $item['id']; ?>" class="category-card">
-                                <img src="<?php echo htmlspecialchars($item['image_path'] ?? $placeholder_img); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
+                                <img src="<?php echo htmlspecialchars('Admin/' . ($item['image_path'] ?? $placeholder_img)); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
                                 <div class="category-card-overlay">
                                     <h3><?php echo htmlspecialchars($item['name']); ?></h3>
                                 </div>

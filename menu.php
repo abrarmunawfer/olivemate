@@ -10,7 +10,7 @@ $sql = "
     SELECT f.*, m.image_path 
     FROM foods AS f
     LEFT JOIN mate_image AS m ON f.img_id = m.id 
-    ORDER BY f.category_id, f.name
+    ORDER BY f.category_id desc
 ";
 $result = $conn->query($sql);
 ?>
@@ -24,7 +24,7 @@ $result = $conn->query($sql);
                 <?php if ($result->num_rows > 0): ?>
                     <?php while($food = $result->fetch_assoc()): ?>
                         <div class="food-card">
-                            <img src="<?php echo htmlspecialchars($food['image_path'] ?? $placeholder_img); ?>" alt="<?php echo htmlspecialchars($food['name']); ?>">
+                            <img src="<?php echo htmlspecialchars('Admin/' . ($food['image_path'] ?? $placeholder_img)); ?>" alt="<?php echo htmlspecialchars($food['name']); ?>">
                             <div class="food-card-content">
                                 <h4><?php echo htmlspecialchars($food['name']); ?></h4>
                                 <p style="font-size: 0.9rem; height: 45px; overflow: hidden;"><?php echo htmlspecialchars($food['description']); ?></p>
