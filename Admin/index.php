@@ -4,7 +4,7 @@
 include 'includes/session.php';
 
 // Check if user is already logged in
-check_logged_in('dashboard.php');
+//check_logged_in('dashboard.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">

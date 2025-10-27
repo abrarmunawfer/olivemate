@@ -33,6 +33,26 @@
         </li>
 
         <li class="sidebar-item">
+            <a href="order_management.php" class="sidebar-link">
+                <i class="bi bi-box-seam-fill"></i>
+                <span>Order Management</span>
+            </a>
+        </li>
+
+        <li class="sidebar-item">
+            <a href="transaction_management.php" class="sidebar-link">
+                 <i class="bi bi-credit-card-fill"></i>
+                <span>Transactions</span>
+            </a>
+        </li>
+
+        <li class="sidebar-item">
+            <a href="testimonials.php" class="sidebar-link">
+                 <i class="bi bi-chat-quote-fill"></i> <span>Testimonials</span>
+            </a>
+        </li>
+
+        <li class="sidebar-item">
             <a href="user_management.php" class="sidebar-link">
                 <i class="bi bi-people-fill"></i>
                 <span>User Management</span>
@@ -44,6 +64,7 @@
                 <span>Session Management</span>
             </a>
         </li>
+
         <li class="sidebar-item">
             <a href="company_profile.php" class="sidebar-link">
                 <i class="bi bi-buildings-fill"></i>

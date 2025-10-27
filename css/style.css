@@ -1355,3 +1355,325 @@ img {
 .auth-btn .fa-spinner {
     margin-right: 5px;
 }
+
+/* ---
+   Profile Page Responsive Styles
+   --- */
+
+/* Container for tabs and content */
+.profile-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden; /* Prevent content overflow */
+}
+
+/* Tab buttons container */
+.profile-tabs {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping initially */
+    overflow-x: auto; /* Allow horizontal scrolling on small screens */
+    background-color: var(--light-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 5px;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+.profile-tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
+}
+
+.tab-link {
+    flex: 0 0 auto; /* Don't grow or shrink, base size on content */
+    padding: 15px 20px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-color);
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+    border-bottom: 3px solid transparent;
+    text-align: center;
+    white-space: nowrap; /* Keep text on one line */
+}
+.tab-link i {
+    margin-right: 8px;
+}
+
+.tab-link:hover {
+    color: var(--primary-green);
+}
+
+.tab-link.active {
+    color: var(--primary-green);
+    border-bottom-color: var(--primary-green);
+}
+
+/* Content area */
+.profile-content {
+    padding: 25px 30px;
+}
+
+.tab-content {
+    display: none; /* Hide inactive tabs */
+}
+
+.tab-content.active {
+    display: block; /* Show active tab */
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Simple fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Account details styling */
+.account-details-info {
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+.account-details-info div {
+    margin-bottom: 10px;
+}
+.account-details-info strong {
+    min-width: 100px; /* Align labels somewhat */
+    display: inline-block;
+    color: var(--dark-color);
+}
+
+/* Testimonial Form specific */
+#testimonial-form .form-group {
+    margin-bottom: 20px;
+}
+
+
+/* Media Queries for Responsiveness */
+
+/* Small Tablets and below */
+@media (max-width: 768px) {
+    .profile-tabs {
+       padding: 0; /* Remove padding to maximize space */
+       justify-content: flex-start; /* Align tabs left */
+    }
+     .tab-link {
+        padding: 12px 15px; /* Slightly smaller padding */
+        font-size: 0.9rem;
+    }
+    .profile-content {
+        padding: 20px; /* Reduce padding */
+    }
+    .section-title {
+        font-size: 1.8rem;
+    }
+}
+
+/* Mobile Phones */
+@media (max-width: 576px) {
+     .tab-link {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+     .tab-link i {
+        margin-right: 5px; /* Reduce icon margin */
+    }
+     .profile-content {
+        padding: 15px;
+    }
+     .account-details-info strong {
+        min-width: 80px;
+    }
+     /* Stack form elements if needed */
+}
+
+/* ---
+   Homepage Responsive Styles
+   --- */
+
+/* General Adjustments */
+@media (max-width: 992px) { /* Tablets */
+    .section-padding {
+        padding: 50px 0;
+    }
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+    h1 { font-size: 2.5rem; }
+    h3 { font-size: 1.3rem; }
+    .btn { padding: 10px 20px; font-size: 0.9rem;}
+}
+
+@media (max-width: 768px) { /* Small Tablets / Large Phones */
+    .section-padding {
+        padding: 40px 0;
+    }
+    .section-title {
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+    }
+     h1 { font-size: 2rem; }
+     h3 { font-size: 1.2rem; }
+     .btn { padding: 8px 18px; }
+     .container { padding-left: 15px; padding-right: 15px; } /* Add padding for container */
+}
+
+@media (max-width: 576px) { /* Mobile Phones */
+     .section-padding {
+        padding: 30px 0;
+    }
+     .section-title {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+    }
+     h1 { font-size: 1.8rem; }
+     h3 { font-size: 1.1rem; }
+      p { font-size: 0.9rem; }
+}
+
+
+/* Cover Section */
+@media (max-width: 768px) {
+    .cover-section {
+        height: 60vh; /* Reduce height */
+        background-position: center center;
+    }
+    .cover-content h1 {
+        font-size: 1.8rem; /* Smaller heading */
+    }
+    .cover-content p {
+        font-size: 1rem;
+    }
+}
+@media (max-width: 576px) {
+    .cover-section {
+        height: 50vh;
+    }
+     .cover-content h1 {
+        font-size: 1.5rem;
+    }
+    .cover-content p {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+     .cover-content .btn {
+         padding: 8px 15px;
+     }
+}
+
+
+/* Popular Food Slider */
+/* Add this if your slider isn't already responsive */
+@media (max-width: 992px) {
+    .food-card {
+        flex: 0 0 calc(50% - 20px); /* 2 cards visible */
+    }
+}
+@media (max-width: 768px) {
+    .food-card {
+        flex: 0 0 calc(80% - 20px); /* Mostly 1 card visible, slightly peek next */
+        margin: 0 10px; /* Adjust margin for spacing */
+    }
+    .slider-container {
+        padding: 0 10px; /* Reduce padding around slider */
+    }
+     .slider-btn { /* Make buttons smaller/closer */
+        width: 35px;
+        height: 35px;
+        font-size: 0.8rem;
+    }
+    .prev-btn { left: 5px; }
+    .next-btn { right: 5px; }
+}
+@media (max-width: 576px) {
+     .food-card {
+        flex: 0 0 calc(90% - 10px); /* Almost full width card */
+         margin: 0 5px;
+    }
+    .slider-container { padding: 0 5px; }
+    .food-card h4 { font-size: 1rem; }
+    .food-card .price { font-size: 0.9rem; }
+    .food-card .btn { padding: 6px 12px; font-size: 0.8rem; }
+}
+
+
+/* Category Section */
+@media (max-width: 768px) {
+    .category-grid {
+        grid-template-columns: 1fr; /* Stack categories */
+        gap: 20px;
+    }
+    .category-card { height: 200px; } /* Adjust height if needed */
+}
+
+
+/* About Info Section */
+@media (max-width: 992px) {
+    .about-info-grid {
+        grid-template-columns: 1fr; /* Stack image and text */
+        gap: 30px;
+        text-align: center;
+    }
+    .about-info-image img {
+        max-width: 80%; /* Reduce image size slightly */
+        margin: 0 auto; /* Center image */
+    }
+    .about-info-content .section-title { text-align: center; }
+    .stats-counter { justify-content: center; }
+}
+@media (max-width: 576px) {
+    .stats-counter { flex-wrap: wrap; gap: 15px; }
+    .stats-counter div { flex-basis: 45%; text-align: center;} /* 2 stats per row */
+    .about-info-content h3 { font-size: 1.1rem; }
+}
+
+
+/* Offer Section */
+@media (max-width: 768px) {
+    .offer-grid {
+        grid-template-columns: 1fr; /* Stack offers */
+        gap: 20px;
+    }
+    .offer-card { min-height: 250px; } /* Adjust height */
+}
+
+
+/* Special Section */
+@media (max-width: 992px) {
+    .special-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns */
+        gap: 20px;
+    }
+}
+@media (max-width: 768px) {
+    .special-grid {
+        grid-template-columns: 1fr; /* Stack specials */
+    }
+}
+
+
+/* Testimonial Section */
+@media (max-width: 992px) {
+    .testimonial-grid {
+        grid-template-columns: 1fr; /* Stack testimonials */
+        gap: 20px;
+    }
+    .testimonial-card {
+         padding: 20px;
+    }
+}
+@media (max-width: 576px) {
+     .testimonial-card { padding: 15px; }
+     .testimonial-card p { font-size: 0.9rem; }
+     .testimonial-card h4 { font-size: 1rem; }
+}
+
+/* Fallback message styling */
+.no-content-message {
+    text-align: center;
+    color: var(--text-color);
+    padding: 20px;
+    font-style: italic;
+}
+

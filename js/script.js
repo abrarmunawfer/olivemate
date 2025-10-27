@@ -14,35 +14,34 @@ $(document).ready(function() {
     // ===================================
 
     // --- Customer Auth Forms (Login/Register) ---
-    $('#login-form, #register-form').on('submit', function(e) {
+    $('#register-form').on('submit', function(e) { // Only targets register form
         e.preventDefault();
         const $form = $(this);
         const $btn = $form.find('button[type="submit"]');
-        const $alert = $('#auth-alert');
+        const $alert = $('#auth-alert'); // Assumes alert ID is reused on register page
         const originalBtnHtml = $btn.html();
 
         $btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
         $alert.hide().removeClass('alert-danger alert-success');
 
         $.ajax({
-            url: 'ajax/auth_action.php',
+            url: 'ajax/auth_action.php', // Correct URL for register
             type: 'POST',
             data: $form.serialize(),
             dataType: 'json',
             success: function(response) {
                 if (response.status === 'success') {
-                    if ($form.attr('id') === 'login-form') {
-                        window.location.href = 'profile.php'; // Redirect to profile
-                    } else {
-                        window.location.href = 'login.php'; // Redirect to login
-                    }
+                    // Always redirect to login page after successful registration
+                    window.location.href = 'login.php';
                 } else {
+                    // Show error on registration page
                     $alert.addClass('alert-danger').html(response.message).slideDown();
                     $btn.prop('disabled', false).html(originalBtnHtml);
                 }
             },
             error: function() {
-                $alert.addClass('alert-danger').html('An error occurred. Please try again.').slideDown();
+                // Show error on registration page
+                $alert.addClass('alert-danger').html('An error occurred during registration. Please try again.').slideDown();
                 $btn.prop('disabled', false).html(originalBtnHtml);
             }
         });
@@ -359,5 +358,7 @@ $(document).ready(function() {
         // Set polling for live orders every 10 seconds
         setInterval(loadLiveOrders, 10000); 
     }
+
+    
 
 });
