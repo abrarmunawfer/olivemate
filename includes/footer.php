@@ -1,23 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OliveMate</title>
-    
-    <link rel="stylesheet" href="css/style.css">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-</head>
-<body>
-
-    <footer class="footer">
+<footer class="footer">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
@@ -48,11 +29,14 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 OliveMate. All Rights Reserved. Designed by Nexlance Global Solutions.</p>
+                <p>&copy; <?php echo date("Y"); ?> OliveMate. All Rights Reserved. Designed by Nexlance Global Solutions.</p>
             </div>
         </div>
     </footer>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script src="js/script.js"></script>
+
 </body>
 </html>

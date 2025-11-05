@@ -1,21 +1,16 @@
 <?php
-// Start session *before* including connection/session files
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Include customer session check
+// 1. Include customer_session.php FIRST. 
+// This file *already* starts the session and includes conn.php.
 include '../connection/customer_session.php';
-// This function checks if customer_id, role, and email are set
+
+// 2. This function checks if customer is logged in.
 check_customer_login('../login.php'); // Redirect to login if not logged in
 
-// Correct path to DB connection is already included via customer_session.php
-// include '../connection/conn.php'; // Already included
-
+// 3. Set header and default response
 header('Content-Type: application/json');
 $response = ['status' => 'error', 'message' => 'Invalid request.'];
 
-// Only process if action is 'submit_testimonial'
+// 4. Process the action
 if (isset($_POST['action']) && $_POST['action'] == 'submit_testimonial') {
 
     $user_id = $_SESSION['customer_id']; // Get user ID from session
@@ -33,8 +28,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'submit_testimonial') {
     } elseif ($rating < 1 || $rating > 5) {
         $response['message'] = 'Invalid rating value.';
     } else {
-        // Prepare INSERT statement
-        // isVisible defaults to 0 in the DB, created_at defaults to CURRENT_TIMESTAMP
+        // $conn is already available from customer_session.php
         $stmt = $conn->prepare("INSERT INTO testimonials (user_id, customer_name, testimonial_text, rating) VALUES (?, ?, ?, ?)");
 
         if (!$stmt) {
