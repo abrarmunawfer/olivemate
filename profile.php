@@ -34,7 +34,7 @@ $user_id = $_SESSION['customer_id'] ?? 0; // Get user ID for testimonial form
     flex-direction: row; /* Horizontal row */
     justify-content: space-around; /* Spread icons out */
     padding: 5px 0;
-    border-bottom: 1px solid var(--c-green-dark);
+    border-bottom: 1px solid var(--border-color);
     background-color: var(--light-bg);
     overflow-x: auto; /* Allow scrolling if too many tabs */
 }
@@ -65,9 +65,9 @@ $user_id = $_SESSION['customer_id'] ?? 0; // Get user ID for testimonial form
     font-weight: 500;
 }
 .tab-link.active {
-    color: var(--primary-green);
-    border-bottom-color: var(--primary-green);
-    background-color: var(--c-green-dark);
+    color: var(--c-green-dark);
+    border-bottom-color: var(--c-green-dark);
+    background-color: transparent;
     box-shadow: none;
 }
 .tab-link:not(.active):hover {

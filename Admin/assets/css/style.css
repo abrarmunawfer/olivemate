@@ -49,17 +49,12 @@ body {
 .sidebar-header {
     padding-bottom: 15px;
     margin-bottom: 15px;
+    align-content: center;
+            align-items: center;
+        display: flex;
+        justify-content: center;
+        align-content: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.sidebar-brand {
-    color: #fff;
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
 }
 .sidebar-brand:hover {
     color: var(--c-green-light);

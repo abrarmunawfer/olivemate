@@ -38,42 +38,24 @@ if ($stmt_covers && $stmt_covers->execute()) {
 if (empty($cover_images)) {
     $cover_images[] = $default_cover;
 }
-// Ensure we have 3 images for the grid, using placeholders if necessary
 while (count($cover_images) < 3) {
-    $cover_images[] = $default_cover; // Use default cover as placeholder
+    $cover_images[] = $default_cover;
 }
 
-
-// Fetch Popular Food (Limit 6)
-$popular_sql = "
-    SELECT f.id, f.name, f.price, f.rating, m.image_path
-    FROM foods AS f
-    LEFT JOIN mate_image AS m ON f.img_id = m.id
-    WHERE f.is_popular = 1 AND f.status = 'available'
-    LIMIT 6
-";
-$popular_result = $conn->query($popular_sql);
-
-// Fetch Categories (Limit 3, Newest First)
+// === UPDATED: Fetch Categories (Limit 6 for slider) ===
 $category_sql = "
     SELECT c.id, c.name, m.image_path
     FROM categories AS c
     LEFT JOIN mate_image AS m ON c.img_id = m.id
     WHERE c.status = 'active'
     ORDER BY c.id DESC
-    LIMIT 3
+    LIMIT 6
 ";
 $category_result = $conn->query($category_sql);
 
-// Fetch Special Dishes (Limit 3 for a cleaner grid)
-$special_sql = "
-    SELECT f.id, f.name, f.description, f.price, m.image_path
-    FROM foods AS f
-    LEFT JOIN mate_image AS m ON f.img_id = m.id
-    WHERE f.is_special = 1 AND f.status = 'available'
-    LIMIT 3
-";
-$special_result = $conn->query($special_sql);
+// === REMOVED: Popular Food SQL ===
+
+// === REMOVED: Special Dishes SQL ===
 
 // Fetch Visible Testimonials (Limit 3 for a grid)
 $testimonial_sql = "
@@ -100,7 +82,7 @@ $offer_result = $conn->query($offer_sql);
 
 <main>
 
-    <!-- === Hero Grid Section === -->
+    <!-- === Hero Grid Section (Unchanged) === -->
     <section class="hero-grid-container">
         <div class="hero-grid">
             <div class="hero-item hero-item-1">
@@ -121,8 +103,45 @@ $offer_result = $conn->query($offer_sql);
     </section>
     <!-- === END Hero Grid Section === -->
 
+        <!-- === NEW: Category Slider Section (Replaces Popular Food) === -->
+    <section class="popular-food-section section-padding bg-beige">
+        <div class="container">
+            <h2 class="section-title">Categories</h2>
+            <div class="slider-container">
+                <div class="slider-wrapper">
+                    <?php if ($category_result && $category_result->num_rows > 0): ?>
+                        <?php while($category = $category_result->fetch_assoc()):
+                            $image_path_cat = $category['image_path'] ? 'Admin/' . $category['image_path'] : $placeholder_img_food;
+                        ?>
+                            <!-- We re-use the "food-card" style for the category slider -->
+                            <div class="food-card">
+                                <a href="category.php?id=<?php echo $category['id']; ?>" class="food-card-img-link">
+                                    <img src="<?php echo htmlspecialchars($image_path_cat); ?>" alt="<?php echo htmlspecialchars($category['name']); ?>">
+                                </a>
+                                <div class="food-card-content">
+                                    <h4><?php echo htmlspecialchars($category['name']); ?></h4>
+                                    <!-- This div provides spacing to match other cards -->
+                                    <div class="price" style="visibility: hidden;">&nbsp;</div> 
+                                    <a href="category.php?id=<?php echo $category['id']; ?>" class="btn btn-primary">
+                                        View All
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <p class="no-content-message">No categories available at the moment.</p>
+                    <?php endif; ?>
+                </div>
+                <?php if ($category_result && $category_result->num_rows > 3): // Show buttons if scrollable ?>
+                    <button class="slider-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button class="slider-btn next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+    <!-- === END Category Slider Section === -->
 
-    <!-- About Info Section (Dark Green BG) -->
+    <!-- About Info Section (Unchanged) -->
     <section class="about-info-section section-padding bg-green-dark">
         <div class="container">
             <div class="about-info-grid">
@@ -139,73 +158,7 @@ $offer_result = $conn->query($offer_sql);
         </div>
     </section>
 
-    <!-- Popular Food Section (Beige BG) -->
-    <section class="popular-food-section section-padding bg-beige">
-        <div class="container">
-            <h2 class="section-title">Popular Food</h2>
-            <div class="slider-container">
-                <div class="slider-wrapper">
-                    <?php if ($popular_result && $popular_result->num_rows > 0): ?>
-                        <?php while($food = $popular_result->fetch_assoc()):
-                            $image_path_popular = $food['image_path'] ? 'Admin/' . $food['image_path'] : $placeholder_img_food;
-                        ?>
-                            <div class="food-card">
-                                <a href="menu.php" class="food-card-img-link">
-                                    <img src="<?php echo htmlspecialchars($image_path_popular); ?>" alt="<?php echo htmlspecialchars($food['name']); ?>">
-                                </a>
-                                <div class="food-card-content">
-                                    <h4><?php echo htmlspecialchars($food['name']); ?></h4>
-                                    <div class="price">$<?php echo htmlspecialchars(number_format($food['price'], 2)); ?></div>
-                                    <button class="btn btn-primary add-to-cart-btn"
-                                            data-id="<?php echo $food['id']; ?>"
-                                            data-name="<?php echo htmlspecialchars($food['name']); ?>"
-                                            data-price="<?php echo $food['price']; ?>"
-                                            data-image="<?php echo htmlspecialchars($image_path_popular); ?>">
-                                        Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        <?php endwhile; ?>
-                    <?php else: ?>
-                        <p class="no-content-message">No popular dishes available at the moment.</p>
-                    <?php endif; ?>
-                </div>
-                <?php if ($popular_result && $popular_result->num_rows > 3): ?>
-                    <button class="slider-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
-                    <button class="slider-btn next-btn"><i class="fa-solid fa-chevron-right"></i></button>
-                <?php endif; ?>
-            </div>
-        </div>
-    </section>
-
-    <!-- Category Section (Dark Green BG) -->
-    <section class="category-section section-padding bg-green-dark">
-        <div class="container">
-            <h2 class="section-title">Categories</h2>
-            <div class="category-grid">
-                <?php if ($category_result && $category_result->num_rows > 0): ?>
-                    <?php while($category = $category_result->fetch_assoc()):
-                         $image_path_cat = $category['image_path'] ? 'Admin/' . $category['image_path'] : $placeholder_img_other;
-                    ?>
-                        <a href="category.php?id=<?php echo $category['id']; ?>" class="category-card">
-                            <img src="<?php echo htmlspecialchars($image_path_cat); ?>"
-                                 alt="<?php echo htmlspecialchars($category['name']); ?>">
-                            <div class="category-card-overlay">
-                                <h3><?php echo htmlspecialchars($category['name']); ?></h3>
-                            </div>
-                        </a>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p class="no-content-message">No categories found.</p>
-                <?php endif; ?>
-            </div>
-             <div class="text-center mt-5">
-                <a href="category.php" class="btn btn-secondary-outline">View All Categories</a>
-            </div>
-        </div>
-    </section>
-    
-    <!-- === OFFER SECTION (RE-ADDED) === -->
+    <!-- === OFFER SECTION (Unchanged) === -->
     <section class="offer-section section-padding bg-beige">
         <div class="container">
             <h2 class="section-title">Today's Offers</h2>
@@ -229,47 +182,32 @@ $offer_result = $conn->query($offer_sql);
         </div>
     </section>
     <!-- === END OFFER SECTION === -->
-    
-    <!-- === SPECIALS SECTION (RE-ADDED) === -->
-    <section class="special-section section-padding bg-green-dark">
+
+    <!-- === NEW: Introduction Section (Replaces Category Grid) === -->
+    <section class="about-info-section section-padding bg-green-dark">
         <div class="container">
-            <h2 class="section-title">Our Specials</h2>
-            <div class="special-grid">
-                <?php if ($special_result && $special_result->num_rows > 0): ?>
-                    <?php while($special = $special_result->fetch_assoc()):
-                         $image_path_special = $special['image_path'] ? 'Admin/' . $special['image_path'] : $placeholder_img_food;
-                    ?>
-                        <div class="food-card"> <!-- Re-using food-card style -->
-                             <a href="menu.php" class="food-card-img-link">
-                                <img src="<?php echo htmlspecialchars($image_path_special); ?>" alt="<?php echo htmlspecialchars($special['name']); ?>">
-                            </a>
-                            <div class="food-card-content">
-                                <h4><?php echo htmlspecialchars($special['name']); ?></h4>
-                                <p><?php echo substr(htmlspecialchars($special['description'] ?? ''), 0, 70) . (strlen($special['description'] ?? '') > 70 ? '...' : ''); ?></p>
-                                <div class="price">$<?php echo htmlspecialchars(number_format($special['price'], 2)); ?></div>
-                                <button class="btn btn-primary add-to-cart-btn"
-                                        data-id="<?php echo $special['id']; ?>"
-                                        data-name="<?php echo htmlspecialchars($special['name']); ?>"
-                                        data-price="<?php echo $special['price']; ?>"
-                                        data-image="<?php echo htmlspecialchars($image_path_special); ?>">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <p class="no-content-message">No special dishes available at the moment.</p>
-                <?php endif; ?>
+            <div class="about-info-grid">
+                <div class="about-info-image">
+                    <!-- Re-using the same image as requested -->
+                    <img src="assets/about.jpg" alt="Restaurant Introduction">
+                </div>
+                <div class="about-info-content">
+                    <h2 class="section-title">A Taste of Tradition</h2>
+                    <h3>Fresh Ingredients, Timeless Flavor</h3>
+                    <p>Our philosophy is simple: use the best ingredients to create unforgettable food. We partner with local farmers to bring you a menu that's both classic and fresh, all prepared with passion by our expert chefs.</p>
+                    <a href="menu.php" class="btn btn-secondary-outline">See Our Menu</a>
+                </div>
             </div>
         </div>
     </section>
-    <!-- === END SPECIALS SECTION === -->
+    <!-- === END Introduction Section === -->
+    
+    <!-- === REMOVED: Special Section === -->
 
-    <!-- Testimonial Section (Beige BG) -->
+    <!-- Testimonial Section (Unchanged) -->
     <section class="testimonial-section section-padding bg-beige">
         <div class="container">
             <h2 class="section-title">What Our Customers Say</h2>
-            <!-- Reverted to testimonial-grid -->
             <div class="testimonial-grid">
                 <?php if ($testimonial_result && $testimonial_result->num_rows > 0): ?>
                     <?php while($testimonial = $testimonial_result->fetch_assoc()):
