@@ -54,6 +54,46 @@ if (isset($_POST['action']) && $_POST['action'] == 'fetch_single') {
     exit();
 }
 
+// ======== DYNAMIC SEARCH (dySearch) ========
+if (isset($_POST['action']) && $_POST['action'] == 'dySearch') {
+    $term = $_POST['term'] ?? '';
+
+    $searchTerm = '%' . $term . '%'; 
+
+    $sql = "SELECT c.*, m.image_path 
+            FROM categories c 
+            LEFT JOIN mate_image m ON c.img_id = m.id 
+            WHERE c.name LIKE ?
+            ORDER BY c.name";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $searchTerm); 
+    
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $categories = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $row['image_path'] = $row['image_path'] ?? 'assets/images/placeholder.png';
+                $categories[] = $row;
+            }
+        }
+        echo json_encode(['status' => 'success', 'data' => $categories]);
+    } else {
+        $response['message'] = 'Search query failed: ' . $stmt->error;
+        echo json_encode($response);
+    }
+    
+    $stmt->close();
+    $conn->close();
+    exit(); 
+}
+
+// ======== FETCH ALL CATEGORIES ========
+if (isset($_POST['action']) && $_POST['action'] == 'fetch_all') {
+    
+}
+
 // ======== ADD CATEGORY ========
 if (isset($_POST['action']) && $_POST['action'] == 'add_category') {
     $name = $_POST['name'];

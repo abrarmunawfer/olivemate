@@ -1,17 +1,25 @@
 <?php
-// Include and run session check
 include 'includes/session.php';
-check_login(); // Redirect to index.php if not logged in
+check_login(); 
 
-// Include the header
 include 'includes/header.php';
 ?>
+
+<style>
+    #menu-search-input::placeholder {
+        font-size: 12px;
+        opacity: 0.7; 
+    }
+</style>
 
 <button class="btn btn-primary btn-float" id="add-menu-btn" title="Add New Menu Item">
     <i class="bi bi-plus-lg"></i>
 </button>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
+        <input type="text" id="menu-search-input" class="form-control" placeholder="Search by item name or code..." title="Search by item name or code...">
+    </div>
 </div>
 
 <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4" id="menu-list">
@@ -38,6 +46,11 @@ include 'includes/header.php';
                             </div>
 
                             <div class="mb-3">
+                                <label for="menu-code" class="form-label">Item Code</label>
+                                <input type="text" class="form-control" id="menu-code" name="code" required>
+                            </div>
+
+                            <div class="mb-3">
                                 <label for="menu-category" class="form-label">Category</label>
                                 <select class="form-select" id="menu-category" name="category_id" required>
                                     <option value="">Loading categories...</option>
@@ -45,7 +58,7 @@ include 'includes/header.php';
                             </div>
 
                             <div class="mb-3">
-                                <label for="menu-price" class="form-label">Price ($)</label>
+                                <label for="menu-price" class="form-label">Price (€)</label>
                                 <input type="number" class="form-control" id="menu-price" name="price" step="0.01" min="0" required>
                             </div>
 
@@ -97,7 +110,6 @@ include 'includes/header.php';
 </div>
 
 <?php
-// Include the footer
 include 'includes/footer.php';
 ?>
 

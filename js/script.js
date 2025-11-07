@@ -151,7 +151,7 @@ $(document).ready(function() {
             success: function(response) {
                 if (response.status === 'success') {
                     $('#summary-items').html(response.summary_html);
-                    $('#summary-total-price').text('$' + response.total_price);
+                    $('#summary-total-price').text('€' + response.total_price);
                     if(response.cart_count !== undefined) {
                          $('#cart-count').text(response.cart_count);
                     }
@@ -255,7 +255,7 @@ $(document).ready(function() {
                                         <strong>Order ID: #${order.id}</strong><br>
                                         <span>Date: ${new Date(order.created_at + 'Z').toLocaleString()}</span>
                                     </div>
-                                    <strong>$${parseFloat(order.total_price).toFixed(2)}</strong>
+                                    <strong>€${parseFloat(order.total_price).toFixed(2)}</strong>
                                     <span class="order-history-status status-${(order.order_status || 'pending').toLowerCase().replace(' ', '-')}">
                                         ${order.order_status}
                                     </span>
@@ -331,7 +331,7 @@ $(document).ready(function() {
                  return `
                     <div class="order-track-item cancelled">
                          <div class="order-track-header">
-                            <div><strong>Order ID: #${order.id}</strong><br><span>Total: $${parseFloat(order.total_price).toFixed(2)}</span></div>
+                            <div><strong>Order ID: #${order.id}</strong><br><span>Total: €${parseFloat(order.total_price).toFixed(2)}</span></div>
                             <span class="order-track-status cancelled-status">Cancelled</span>
                         </div>
                         <p class="text-center text-danger mt-3">This order has been cancelled.</p>
@@ -341,7 +341,7 @@ $(document).ready(function() {
             return `
                 <div class="order-track-item">
                     <div class="order-track-header">
-                        <div><strong>Order ID: #${order.id}</strong><br><span>Total: $${parseFloat(order.total_price).toFixed(2)}</span></div>
+                        <div><strong>Order ID: #${order.id}</strong><br><span>Total: €${parseFloat(order.total_price).toFixed(2)}</span></div>
                         <span class="order-track-status">${order.order_status}</span>
                     </div>
                     <div class="order-progress-bar">

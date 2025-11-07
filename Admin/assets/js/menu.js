@@ -32,13 +32,24 @@ $(document).ready(function() {
     }
 
     // --- 2. Load All Menu Items ---
-    function loadMenu() {
+// --- 2. Load All Menu Items (Modified for Search) ---
+    function loadMenu(searchTerm = '') { // <-- Add searchTerm parameter
         $menuList.html('<div class="col-12 text-center"><span class="spinner-border" role="status"></span><p>Loading menu items...</p></div>');
         
+        let ajaxData = {
+            action: 'fetch_all' // Default action
+        };
+
+        // If user is searching, change the action and add the term
+        if (searchTerm.length > 0) {
+            ajaxData.action = 'dySearch';
+            ajaxData.term = searchTerm;
+        }
+
         $.ajax({
             url: 'ajax/menu_action.php',
             type: 'POST',
-            data: { action: 'fetch_all' },
+            data: ajaxData, // <-- Use the new ajaxData object
             dataType: 'json',
             success: function(response) {
                 $menuList.empty();
@@ -54,9 +65,10 @@ $(document).ready(function() {
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between">
                                             <h5 class="card-title">${item.name}</h5>
-                                            <span class="item-price">$${item.price}</span>
+                                            <span class="item-price">€${item.price}</span>
                                         </div>
                                         <small class="text-muted d-block mb-2">${item.category_name || 'Uncategorized'}</small>
+                                        <small class="text-primary d-block mb-2">Code: ${item.code || 'N/A'}</small>
                                         <p class="card-text">${item.description || 'No description.'}</p>
                                     </div>
                                     <div class="card-footer d-flex justify-content-between align-items-center">
@@ -84,6 +96,12 @@ $(document).ready(function() {
             }
         });
     }
+
+    // --- Live Search ---
+    $('#menu-search-input').on('keyup', function() {
+        var searchTerm = $(this).val();
+        loadMenu(searchTerm); // Re-load menu with the search term
+    });
 
     // --- 3. Show "Add" Modal ---
     $('#add-menu-btn').on('click', function() {
@@ -147,6 +165,7 @@ $(document).ready(function() {
                     var item = response.data;
                     $('#menu-id').val(item.id);
                     $('#menu-name').val(item.name);
+                    $('#menu-code').val(item.code);
                     $('#menu-price').val(item.price);
                     $('#menu-description').val(item.description);
                     $('#menu-status').val(item.status);

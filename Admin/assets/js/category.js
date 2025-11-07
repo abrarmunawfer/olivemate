@@ -4,14 +4,23 @@ $(document).ready(function() {
     const $form = $('#category-form');
     const $submitBtn = $('#category-submit-btn');
 
-    // --- 1. Load All Categories ---
-    function loadCategories() {
+    // --- 1. Load All Categories with dynamic search ---
+    function loadCategories(searchTerm = '') { 
         $categoryList.html('<div class="col-12 text-center"><span class="spinner-border" role="status"></span><p>Loading categories...</p></div>');
         
+        let ajaxData = {
+            action: 'fetch_all'
+        };
+
+        if (searchTerm.length > 0) {
+            ajaxData.action = 'dySearch';
+            ajaxData.term = searchTerm;
+        }
+
         $.ajax({
             url: 'ajax/category_action.php',
             type: 'POST',
-            data: { action: 'fetch_all' },
+            data: ajaxData,
             dataType: 'json',
             success: function(response) {
                 $categoryList.empty();
@@ -47,10 +56,16 @@ $(document).ready(function() {
         });
     }
 
+    // --- Live Search ---
+    $('#category-search-input').on('keyup', function() {
+        var searchTerm = $(this).val();
+        loadCategories(searchTerm); // Re-load categories with the search term
+    });
+
     // --- 2. Show "Add" Modal ---
     $('#add-category-btn').on('click', function() {
         window.resetModalForm('categoryModal', 'category-form', 'add_category');
-        $('#image-preview').attr('src', 'assets/images/placeholder.png').show(); // Show placeholder
+        $('#image-preview').attr('src', 'assets/images/placeholder.png').show(); 
         $modal.modal('show');
     });
 
@@ -95,7 +110,6 @@ $(document).ready(function() {
     $categoryList.on('click', '.edit-btn', function() {
         var id = $(this).data('id');
         
-        // Reset modal and set action
         window.resetModalForm('categoryModal', 'category-form', 'update_category');
         
         $.ajax({

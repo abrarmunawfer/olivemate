@@ -53,7 +53,7 @@ $items_result = $conn->query($sql);
                                 <img src="<?php echo htmlspecialchars('Admin/' . ($item['image_path'] ?? $placeholder_img)); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
                                 <div class="food-card-content">
                                     <h4><?php echo htmlspecialchars($item['name']); ?></h4>
-                                    <div class="price">$<?php echo htmlspecialchars($item['price']); ?></div>
+                                    <div class="price">€<?php echo htmlspecialchars($item['price']); ?></div>
                                     <div class="rating">
                                         <?php for($i = 0; $i < $item['rating']; $i++): ?><i class="fa-solid fa-star"></i><?php endfor; ?>
                                         <?php for($i = $item['rating']; $i < 5; $i++): ?><i class="fa-regular fa-star"></i><?php endfor; ?>

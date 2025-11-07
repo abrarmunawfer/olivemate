@@ -1,17 +1,26 @@
 <?php
-// Include and run session check
 include 'includes/session.php';
-check_login(); // Redirect to index.php if not logged in
+check_login(); 
 
-// Include the header
 include 'includes/header.php';
 ?>
+
+<style>
+    #category-search-input::placeholder {
+        font-size: 12px;
+        opacity: 0.7; 
+    }
+</style>
 
 <button class="btn btn-primary btn-float" id="add-category-btn" title="Add New Category">
     <i class="bi bi-plus-lg"></i>
 </button>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
+        <input type="text" id="category-search-input" class="form-control" 
+            placeholder="Search by category name..." title="Search by category name...">
+    </div>
 </div>
 
 <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4" id="category-list">
@@ -69,7 +78,6 @@ include 'includes/header.php';
 
 
 <?php
-// Include the footer
 include 'includes/footer.php';
 ?>
 

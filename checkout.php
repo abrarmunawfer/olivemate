@@ -49,7 +49,7 @@ include 'includes/header.php';
                     </div>
                 <div class="summary-total">
                     <strong>Total:</strong>
-                    <strong id="summary-total-price">$0.00</strong>
+                    <strong id="summary-total-price">€0.00</strong>
                 </div>
             </div>
 

@@ -1,5 +1,4 @@
 <?php
-// Include session, security check, and image handler
 include '../includes/session.php';
 check_login('../index.php');
 include '../includes/image_handler.php';
@@ -7,7 +6,7 @@ include '../includes/image_handler.php';
 header('Content-Type: application/json');
 $response = ['status' => 'error', 'message' => 'An unknown error occurred.'];
 $user_id = $_SESSION['user_id'];
-$target_dir = "../assets/images/menu/"; // Different directory
+$target_dir = "../assets/images/menu/"; 
 
 // ======== FETCH ALL MENU ITEMS ========
 if (isset($_POST['action']) && $_POST['action'] == 'fetch_all') {
@@ -54,9 +53,49 @@ if (isset($_POST['action']) && $_POST['action'] == 'fetch_single') {
     exit();
 }
 
+// ======== DYNAMIC SEARCH (dySearch) ========
+if (isset($_POST['action']) && $_POST['action'] == 'dySearch') {
+    $term = $_POST['term'] ?? '';
+    $searchTerm = '%' . $term . '%'; 
+
+    $sql = "SELECT f.*, m.image_path, c.name AS category_name
+            FROM foods f
+            LEFT JOIN mate_image m ON f.img_id = m.id 
+            LEFT JOIN categories c ON f.category_id = c.id
+            WHERE (f.name LIKE ? OR f.code LIKE ?)
+            ORDER BY f.name";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $searchTerm, $searchTerm); 
+    
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $foods = [];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $row['image_path'] = $row['image_path'] ?? 'assets/images/placeholder.png';
+                $foods[] = $row;
+            }
+        }
+        echo json_encode(['status' => 'success', 'data' => $foods]);
+    } else {
+        $response['message'] = 'Search query failed: ' . $stmt->error;
+        echo json_encode($response);
+    }
+    
+    $stmt->close();
+    $conn->close();
+    exit(); 
+}
+
+// ======== FETCH ALL MENU ITEMS ========
+if (isset($_POST['action']) && $_POST['action'] == 'fetch_all') {
+}
+
 // ======== ADD MENU ITEM ========
 if (isset($_POST['action']) && $_POST['action'] == 'add_menu') {
     $name = $_POST['name'];
+    $code = $_POST['code'];
     $category_id = (int)$_POST['category_id'];
     $price = (float)$_POST['price'];
     $description = $_POST['description'];
@@ -66,7 +105,6 @@ if (isset($_POST['action']) && $_POST['action'] == 'add_menu') {
     $img_id = null;
 
     try {
-        // 1. Handle image upload
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
             $img_id = uploadWebpImage($_FILES['image'], $target_dir, 'food', $user_id, $conn);
             if ($img_id === false) {
@@ -74,10 +112,9 @@ if (isset($_POST['action']) && $_POST['action'] == 'add_menu') {
             }
         }
         
-        // 2. Insert into foods table
-        $stmt = $conn->prepare("INSERT INTO foods (name, category_id, price, description, status, is_popular, is_special, img_id, created_by) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sidssiiis", $name, $category_id, $price, $description, $status, $is_popular, $is_special, $img_id, $user_id);
+        $stmt = $conn->prepare("INSERT INTO foods (name, code, category_id, price, description, status, is_popular, is_special, img_id, created_by) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssidsiiiii", $name, $code, $category_id, $price, $description, $status, $is_popular, $is_special, $img_id, $user_id);
         
         if ($stmt->execute()) {
             $response['status'] = 'success';
@@ -99,6 +136,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'add_menu') {
 if (isset($_POST['action']) && $_POST['action'] == 'update_menu') {
     $id = (int)$_POST['menu_id'];
     $name = $_POST['name'];
+    $code = $_POST['code'];
     $category_id = (int)$_POST['category_id'];
     $price = (float)$_POST['price'];
     $description = $_POST['description'];
@@ -109,14 +147,12 @@ if (isset($_POST['action']) && $_POST['action'] == 'update_menu') {
     $old_img_id = null;
 
     try {
-        // Get old image ID
         $stmt = $conn->prepare("SELECT img_id FROM foods WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $old_img_id = $stmt->get_result()->fetch_assoc()['img_id'];
         $stmt->close();
 
-        // 1. Handle new image upload
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
             $new_img_id = uploadWebpImage($_FILES['image'], $target_dir, 'food', $user_id, $conn);
             if ($new_img_id === false) {
@@ -124,19 +160,17 @@ if (isset($_POST['action']) && $_POST['action'] == 'update_menu') {
             }
         }
         
-        // 2. Update foods table
         if ($new_img_id) {
-            $sql = "UPDATE foods SET name=?, category_id=?, price=?, description=?, status=?, is_popular=?, is_special=?, img_id=? WHERE id=?";
+            $sql = "UPDATE foods SET name=?, code=?, category_id=?, price=?, description=?, status=?, is_popular=?, is_special=?, img_id=? WHERE id=?";
             $update_stmt = $conn->prepare($sql);
-            $update_stmt->bind_param("sidssiiii", $name, $category_id, $price, $description, $status, $is_popular, $is_special, $new_img_id, $id);
+            $update_stmt->bind_param("ssidsiiiii", $name, $code, $category_id, $price, $description, $status, $is_popular, $is_special, $new_img_id, $id);
         } else {
-            $sql = "UPDATE foods SET name=?, category_id=?, price=?, description=?, status=?, is_popular=?, is_special=? WHERE id=?";
+            $sql = "UPDATE foods SET name=?, code=?, category_id=?, price=?, description=?, status=?, is_popular=?, is_special=? WHERE id=?";
             $update_stmt = $conn->prepare($sql);
-            $update_stmt->bind_param("sidssiii", $name, $category_id, $price, $description, $status, $is_popular, $is_special, $id);
+            $update_stmt->bind_param("ssidsiiii", $name, $code, $category_id, $price, $description, $status, $is_popular, $is_special, $id);
         }
 
         if ($update_stmt->execute()) {
-            // 3. Delete old image
             if ($new_img_id && $old_img_id) {
                 deleteImage($old_img_id, $conn);
             }
@@ -161,7 +195,6 @@ if (isset($_POST['action']) && $_POST['action'] == 'delete') {
     $img_id = null;
     
     try {
-        // Get image ID before deleting
         $stmt = $conn->prepare("SELECT img_id FROM foods WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
@@ -171,12 +204,10 @@ if (isset($_POST['action']) && $_POST['action'] == 'delete') {
         }
         $stmt->close();
         
-        // Delete the food item
         $delete_stmt = $conn->prepare("DELETE FROM foods WHERE id = ?");
         $delete_stmt->bind_param("i", $id);
         
         if ($delete_stmt->execute()) {
-            // Delete the associated image
             if ($img_id) {
                 deleteImage($img_id, $conn);
             }

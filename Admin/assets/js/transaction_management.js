@@ -19,7 +19,7 @@ $(document).ready(function() {
                 "data": "amount",
                 "render": function(data) {
                     // Format amount as currency
-                    return '$' + parseFloat(data).toFixed(2);
+                    return '€' + parseFloat(data).toFixed(2);
                 }
             },
             {
