@@ -1,5 +1,5 @@
 <?php
-include 'connection/conn.php';
+include 'connection/conn.php'; // Include DB connection first
 
 $message_sent = false;
 $error_message = '';
@@ -8,34 +8,29 @@ $error_message = '';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $conn->real_escape_string(trim($_POST['name']));
     $email = $conn->real_escape_string(trim($_POST['email']));
-    $message_body = $conn->real_escape_string(trim($_POST['message'])); // Renamed to avoid conflict
+    $message_body = $conn->real_escape_string(trim($_POST['message'])); // Renamed
 
     if (!empty($name) && !empty($email) && !empty($message_body) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
         
-        // 1. Save to Database
         $stmt = $conn->prepare("INSERT INTO contacts (name, email, message) VALUES (?, ?, ?)");
         $stmt->bind_param("sss", $name, $email, $message_body);
 
         if ($stmt->execute()) {
             $message_sent = true;
             
-            // 2. Send Email
             $to = 'your-email@gmail.com'; // <-- REPLACE THIS WITH YOUR EMAIL
             $subject = 'New Contact Form Submission from ' . $name;
             
-            // Set headers
             $headers = "From: " . $name . " <" . $email . ">\r\n";
             $headers .= "Reply-To: " . $email . "\r\n";
             $headers .= "MIME-Version: 1.0\r\n";
             $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-            // Use output buffering to capture the email template
             ob_start();
-            include 'email_template.php'; // This file uses $name, $email, $message_body
+            // Pass variables to the template
+            include 'email_template.php'; 
             $body = ob_get_clean();
 
-            // Send the email
-            // Note: This will likely go to spam. Using SMTP (PHPMailer) is recommended for production.
             mail($to, $subject, $body, $headers);
 
         } else {
@@ -47,23 +42,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// Fetch company details for the contact info box
+// --- Page-Specific Data ---
+$default_cover = 'assets/cover/cover.jpg';
 $company_address = "123 Restaurant St, Colombo, Sri Lanka";
 $company_email = "info@delicious.com";
 $company_phone = "+94 77 123 4567";
 
+// --- Fetch Company Details ---
 $stmt_company = $conn->prepare("SELECT address, contact_number, email FROM company_profile WHERE id = 1 LIMIT 1");
 if ($stmt_company && $stmt_company->execute()) {
     $result_company = $stmt_company->get_result();
     if ($row = $result_company->fetch_assoc()) {
-        $company_address = $row['address'] ?: $company_address;
-        $company_email = $row['email'] ?: $company_email;
-        $company_phone = $row['contact_number'] ?: $company_phone;
+        $company_address = $row['address'] ? nl2br(htmlspecialchars($row['address'])) : $company_address;
+        $company_email = $row['email'] ? htmlspecialchars($row['email']) : $company_email;
+        $company_phone = $row['contact_number'] ? htmlspecialchars($row['contact_number']) : $company_phone;
     }
     $stmt_company->close();
 }
 
+// --- Fetch 1 Cover Image (Changed from 3) ---
+$cover_image_url = $default_cover; // Start with default
+$stmt_covers = $conn->prepare("
+    SELECT image_path
+    FROM mate_image
+    WHERE image_category = 'cover'
+    ORDER BY modified_datetime DESC, created_datetime DESC
+    LIMIT 1
+");
+if ($stmt_covers && $stmt_covers->execute()) {
+    $result_covers = $stmt_covers->get_result();
+    if ($row = $result_covers->fetch_assoc()) {
+        $cover_image_url = 'Admin/' . $row['image_path']; // Found one, replace default
+    }
+    $stmt_covers->close();
+}
 
+// Include header *after* all PHP logic
 include 'includes/header.php';
 ?>
 
@@ -73,47 +87,60 @@ include 'includes/header.php';
 ============================================================
 -->
 <style>
-.page-header {
-    height: 45vh; /* Shorter height for contact page */
+/* Hero Grid Style (single image) */
+.hero-grid-container {
     position: relative;
+    padding: 1.5rem; /* This creates the "gaps" */
+    background-color: var(--c-beige);
+    height: 50vh; /* Shorter height for inner pages */
+    display: flex; /* Use flex for single item */
+    align-items: stretch;
+    justify-content: stretch;
+}
+.hero-item-single {
+    flex-grow: 1; /* Make item fill the space */
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background-image: url('https://i.pinimg.com/564x/e7/71/ea/e771eaf0f03c0041d8e826ca461352e6.jpg');
-    background-size: cover;
-    background-position: center;
-    color: var(--c-light-color);
+    border-radius: 10px; /* Rounded corners */
 }
-.page-header::before {
-    content: '';
+.hero-item-single img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* Centered Content (re-using from index.php styles) */
+.cover-content-center {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--c-light-color);
+    padding: 20px;
+    z-index: 10;
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
-    z-index: 1;
 }
-.page-header h1 {
-    position: relative;
-    z-index: 2;
+.cover-content-center h1 {
+    font-size: 3.5rem;
     font-family: var(--font-heading);
-    font-size: 3rem;
     font-weight: 700;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
 }
 
+/* Contact Section */
 .contact-section {
-    background-color: var(--c-beige); /* Main beige background */
+    background-color: var(--c-beige);
 }
-
 .contact-container {
     display: grid;
-    grid-template-columns: 2fr 1fr; /* Form takes 2/3, info takes 1/3 */
+    grid-template-columns: 2fr 1fr; /* 2/3 for form, 1/3 for info */
     gap: 40px;
     align-items: flex-start;
 }
-
-/* Contact form uses the global .form-group and .form-control styles */
 .contact-form {
     background: var(--c-light-color);
     padding: 30px;
@@ -126,13 +153,12 @@ include 'includes/header.php';
     margin-bottom: 25px;
     font-size: 1.8rem;
 }
-
-/* Contact info box styled with dark green */
 .contact-info {
-    background-color: var(--c-green-dark);
+    background-color: var(--c-green-dark); /* Dark green info box */
     color: var(--c-light-text);
     padding: 30px;
     border-radius: 15px;
+    box-shadow: var(--shadow);
 }
 .contact-info h3 {
     color: var(--c-light-color);
@@ -142,11 +168,11 @@ include 'includes/header.php';
     align-items: flex-start;
     margin-bottom: 25px;
     font-size: 1rem;
-    color: #ccc; /* Lighter text on dark bg */
+    color: #ccc;
 }
 .contact-info .info-item i {
     font-size: 1.5rem;
-    color: var(--c-brown); /* Brown accent for icons */
+    color: var(--c-brown); /* Brown icons */
     width: 30px;
     flex-shrink: 0;
     margin-top: 3px;
@@ -161,12 +187,24 @@ include 'includes/header.php';
     .contact-container {
         grid-template-columns: 1fr; /* Stack on tablets */
     }
+    .hero-grid-container {
+        height: 45vh;
+    }
+    .cover-content-center h1 {
+        font-size: 2.5rem;
+    }
 }
-@media (max-width: 768px) {
-    .page-header { height: 35vh; }
-    .page-header h1 { font-size: 2.5rem; }
-    .contact-form { padding: 20px; }
-    .contact-info { padding: 20px; }
+@media (max-width: 576px) {
+    .hero-grid-container {
+        height: 35vh;
+        padding: 1rem; /* Smaller "gaps" on mobile */
+    }
+     .cover-content-center h1 {
+        font-size: 2rem;
+    }
+    .contact-form, .contact-info {
+        padding: 20px;
+    }
 }
 </style>
 
@@ -176,12 +214,16 @@ include 'includes/header.php';
 ============================================================
 -->
 <main>
-    <!-- Single Image Header -->
-    <section class="page-header">
-        <div class="container">
+    <!-- === UPDATED: Single Image Hero Grid === -->
+    <section class="hero-grid-container">
+        <div class="hero-item-single">
+            <img src="<?php echo htmlspecialchars($cover_image_url); ?>" alt="Contact Us">
+        </div>
+        <div class="cover-content-center">
             <h1>Contact Us</h1>
         </div>
     </section>
+    <!-- === END Header === -->
     
     <!-- Contact Form Section -->
     <section class="contact-section section-padding">
@@ -194,7 +236,7 @@ include 'includes/header.php';
                     <h3>Send Us a Message</h3>
                     <?php if ($message_sent): ?>
                         <div class="alert-message alert-success">
-                            Thank you! Your message has been sent successfully. We will get back to you soon.
+                            Thank you! Your message has been sent successfully.
                         </div>
                     <?php endif; ?>
                     <?php if (!empty($error_message)): ?>
@@ -225,15 +267,15 @@ include 'includes/header.php';
                     <h3>Contact Details</h3>
                     <div class="info-item">
                         <i class="fa-solid fa-location-dot"></i>
-                        <span><?php echo nl2br(htmlspecialchars($company_address)); ?></span>
+                        <span><?php echo $company_address; ?></span>
                     </div>
                     <div class="info-item">
                         <i class="fa-solid fa-phone"></i>
-                        <span><?php echo htmlspecialchars($company_phone); ?></span>
+                        <span><?php echo $company_phone; ?></span>
                     </div>
                     <div class="info-item">
                         <i class="fa-solid fa-envelope"></i>
-                        <span><?php echo htmlspecialchars($company_email); ?></span>
+                        <span><?php echo $company_email; ?></span>
                     </div>
                     <div class="info-item">
                         <i class="fa-solid fa-clock"></i>

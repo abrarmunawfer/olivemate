@@ -52,41 +52,52 @@ if ($stmt_chefs && $stmt_chefs->execute()) {
 }
 ?>
 
-<!-- ---
-Page-Specific CSS for About Page
---- -->
+<!--
+============================================================
+== Page-Specific CSS
+============================================================
+-->
 <style>
-/* Header for inner pages */
-.page-header {
-    height: 45vh; /* Shorter height */
+/* Hero Grid Style (single image) */
+.hero-grid-container {
     position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    background-size: cover;
-    background-position: center;
-    color: var(--c-light-color);
+    padding: 1.5rem; /* This creates the "gaps" */
+    background-color: var(--c-beige);
+    height: 50vh; /* Shorter height for inner pages */
+    display: flex; /* Use flex for single item */
+    align-items: stretch;
+    justify-content: stretch;
 }
-.page-header::before {
-    /* This is the overlay */
-    content: '';
+.hero-item-single {
+    flex-grow: 1; /* Make item fill the space */
+    overflow: hidden;
+    border-radius: 10px; /* Rounded corners */
+}
+.hero-item-single img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* Centered Content (re-using from index.php styles) */
+.cover-content-center {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--c-light-color);
+    padding: 20px;
+    z-index: 10;
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
-    z-index: 1;
 }
-.page-header .container {
-    position: relative;
-    z-index: 2; /* Content above overlay */
-}
-.page-header h1 {
+.cover-content-center h1 {
+    font-size: 3.5rem;
     font-family: var(--font-heading);
-    font-size: 3rem;
     font-weight: 700;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
 }
@@ -131,25 +142,42 @@ Page-Specific CSS for About Page
 }
 .chef-card p {
     font-size: 0.9rem;
-    color: var(--c-text); /* Use standard text color */
+    color: var(--c-text);
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-    .page-header { height: 35vh; }
-    .page-header h1 { font-size: 2.5rem; }
+@media (max-width: 992px) {
+    .hero-grid-container {
+        height: 45vh;
+    }
+    .cover-content-center h1 {
+        font-size: 2.5rem;
+    }
 }
 @media (max-width: 576px) {
-    .page-header { height: 30vh; }
-    .page-header h1 { font-size: 2rem; }
+    .hero-grid-container {
+        height: 35vh;
+        padding: 1rem; /* Smaller "gaps" on mobile */
+    }
+     .cover-content-center h1 {
+        font-size: 2rem;
+    }
 }
 </style>
 
+<!--
+============================================================
+== Page HTML Content
+============================================================
+-->
 <main>
 
-    <!-- === UPDATED: Single Image Header === -->
-    <section class="page-header" style="background-image: url('<?php echo htmlspecialchars($cover_image_url); ?>');">
-        <div class="container">
+    <!-- === UPDATED: Single Image Hero Grid === -->
+    <section class="hero-grid-container">
+        <div class="hero-item-single">
+            <img src="<?php echo htmlspecialchars($cover_image_url); ?>" alt="About Us">
+        </div>
+        <div class="cover-content-center">
             <h1>About Us</h1>
         </div>
     </section>
