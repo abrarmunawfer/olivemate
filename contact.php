@@ -1,13 +1,20 @@
 <?php
-include 'connection/conn.php'; // Include DB connection first
+// 1. Use Composer's Autoloader
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
+// 2. Include the Autoload file
+require 'vendor/autoload.php';
+
+include 'connection/conn.php'; 
 
 $message_sent = false;
 $error_message = '';
-$company_name = "OliveMate"; // Default
+$company_name = "OliveMate";
 
-// --- Fetch Company Details ---
 $company_address = "123 Restaurant St, Colombo, Sri Lanka";
-$company_email = "info@delicious.com"; // Default email
+$company_email = "info@delicious.com";
 $company_phone = "+94 77 123 4567";
 
 $stmt_company = $conn->prepare("SELECT company_name, address, contact_number, email FROM company_profile WHERE id = 1 LIMIT 1");
@@ -16,46 +23,57 @@ if ($stmt_company && $stmt_company->execute()) {
     if ($row = $result_company->fetch_assoc()) {
         $company_name = $row['company_name'] ?: $company_name;
         $company_address = $row['address'] ? nl2br(htmlspecialchars($row['address'])) : $company_address;
-        $company_email = $row['email'] ? htmlspecialchars($row['email']) : $company_email; // This is the admin email
+        $company_email = $row['email'] ? htmlspecialchars($row['email']) : $company_email; 
         $company_phone = $row['contact_number'] ? htmlspecialchars($row['contact_number']) : $company_phone;
     }
     $stmt_company->close();
 }
 
 
-// --- Check if the form is submitted ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $conn->real_escape_string(trim($_POST['name']));
     $email = $conn->real_escape_string(trim($_POST['email']));
-    $message_body = $conn->real_escape_string(trim($_POST['message'])); // Renamed
+    $message_body = $conn->real_escape_string(trim($_POST['message']));
 
     if (!empty($name) && !empty($email) && !empty($message_body) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
         
-        // 1. Save to Database
         $stmt = $conn->prepare("INSERT INTO contacts (name, email, message) VALUES (?, ?, ?)");
         $stmt->bind_param("sss", $name, $email, $message_body);
 
         if ($stmt->execute()) {
-            $message_sent = true;
+            $message_sent = true; 
             
-            // 2. Send Email
-            $to = $company_email; // <-- UPDATED: Use the email from the database
-            $subject = 'New Contact Form Submission from ' . htmlspecialchars($name);
-            
-            $headers = "From: " . htmlspecialchars($name) . " <" . htmlspecialchars($email) . ">\r\n";
-            $headers .= "Reply-To: " . htmlspecialchars($email) . "\r\n";
-            $headers .= "MIME-Version: 1.0\r\n";
-            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+            $mail = new PHPMailer(true); 
 
-            ob_start();
-            include 'email_template.php'; 
-            $body = ob_get_clean();
+            try {
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'nexlance.2025@gmail.com'; 
+                $mail->Password   = 'ajds yhgr okil abcd';     // Your App Password
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                $mail->Port       = 465; 
 
-            // Send the email using the simple mail() function
-            if(!mail($to, $subject, $body, $headers)) {
-                // Email failed, but DB save worked. Show a specific error.
-                $error_message = "Your message was saved, but the email could not be sent. Please contact us directly at " . $to;
-                $message_sent = false; // Override success flag
+                $mail->setFrom('nexlance.2025@gmail.com', htmlspecialchars($name));
+                $mail->addAddress($company_email, $company_name); 
+                $mail->addReplyTo(htmlspecialchars($email), htmlspecialchars($name)); 
+
+                $mail->isHTML(true);
+                $mail->Subject = 'New Contact Form Submission from ' . htmlspecialchars($name);
+                
+                ob_start();
+                include 'email_template.php'; 
+                $body = ob_get_clean();
+                
+                $mail->Body = $body;
+                $mail->AltBody = strip_tags($message_body); 
+
+                $mail->send();
+                
+            } catch (Exception $e) {
+                $error_message = "Message saved, but email could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                $message_sent = false; 
+                error_log("PHPMailer Error: " . $mail->ErrorInfo); 
             }
 
         } else {
@@ -68,9 +86,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 
-// --- Fetch 1 Cover Image ---
 $default_cover = 'assets/cover/cover.jpg';
-$cover_image_url = $default_cover;
+$cover_image_url = $default_cover; 
 $stmt_covers = $conn->prepare("
     SELECT image_path
     FROM mate_image
@@ -86,25 +103,23 @@ if ($stmt_covers && $stmt_covers->execute()) {
     $stmt_covers->close();
 }
 
-// Include header *after* all PHP logic
 include 'includes/header.php';
 ?>
 
 <style>
-/* Hero Grid Style (single image) */
 .hero-grid-container {
     position: relative;
-    padding: 1.5rem;
+    padding: 1.5rem; 
     background-color: var(--c-beige);
-    height: 50vh;
-    display: flex;
+    height: 50vh; 
+    display: flex; 
     align-items: stretch;
     justify-content: stretch;
 }
 .hero-item-single {
-    flex-grow: 1;
+    flex-grow: 1; 
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: 10px; 
 }
 .hero-item-single img {
     width: 100%;
@@ -113,7 +128,10 @@ include 'includes/header.php';
 }
 .cover-content-center {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -130,14 +148,12 @@ include 'includes/header.php';
     font-weight: 700;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
 }
-
-/* Contact Section */
 .contact-section {
     background-color: var(--c-beige);
 }
 .contact-container {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2fr 1fr; 
     gap: 40px;
     align-items: flex-start;
 }
@@ -154,7 +170,7 @@ include 'includes/header.php';
     font-size: 1.8rem;
 }
 .contact-info {
-    background-color: var(--c-green-dark);
+    background-color: var(--c-green-dark); 
     color: var(--c-light-text);
     padding: 30px;
     border-radius: 15px;
@@ -172,7 +188,7 @@ include 'includes/header.php';
 }
 .contact-info .info-item i {
     font-size: 1.5rem;
-    color: var(--c-brown);
+    color: var(--c-brown); 
     width: 30px;
     flex-shrink: 0;
     margin-top: 3px;
@@ -182,7 +198,6 @@ include 'includes/header.php';
     line-height: 1.7;
 }
 
-/* Responsive */
 @media (max-width: 992px) {
     .contact-container {
         grid-template-columns: 1fr;
@@ -209,7 +224,6 @@ include 'includes/header.php';
 </style>
 
 <main>
-    <!-- Single Image Hero Grid -->
     <section class="hero-grid-container">
         <div class="hero-item-single">
             <img src="<?php echo htmlspecialchars($cover_image_url); ?>" alt="Contact Us">
@@ -219,13 +233,11 @@ include 'includes/header.php';
         </div>
     </section>
     
-    <!-- Contact Form Section -->
     <section class="contact-section section-padding">
         <div class="container">
             <h2 class="section-title">Get in Touch</h2>
             <div class="contact-container">
                 
-                <!-- Form Column -->
                 <div class="contact-form">
                     <h3>Send Us a Message</h3>
                     <?php if ($message_sent): ?>
@@ -256,7 +268,6 @@ include 'includes/header.php';
                     </form>
                 </div>
                 
-                <!-- Info Column -->
                 <div class="contact-info">
                     <h3>Contact Details</h3>
                     <div class="info-item">
