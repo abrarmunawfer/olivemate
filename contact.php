@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt->execute()) {
             $message_sent = true;
             
-            $to = 'your-email@gmail.com'; // <-- REPLACE THIS WITH YOUR EMAIL
+            $to = 'nexlance.2025@gmail.com'; // <-- REPLACE THIS WITH YOUR EMAIL
             $subject = 'New Contact Form Submission from ' . $name;
             
             $headers = "From: " . $name . " <" . $email . ">\r\n";
