@@ -50,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
                 $mail->Username   = 'nexlance.2025@gmail.com'; 
-                $mail->Password   = 'ajds yhgr okil abcd';     // Your App Password
+                $mail->Password   = 'aqcp abvd tnio tegj';    
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                 $mail->Port       = 465; 
 
