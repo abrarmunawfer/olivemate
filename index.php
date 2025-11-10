@@ -103,7 +103,26 @@ $offer_result = $conn->query($offer_sql);
     </section>
     <!-- === END Hero Grid Section === -->
 
-        <!-- === NEW: Category Slider Section (Replaces Popular Food) === -->
+    <!-- === NEW: Introduction Section (Replaces Category Grid) === -->
+    <section class="about-info-section section-padding bg-green-dark">
+        <div class="container">
+            <div class="about-info-grid">
+                <div class="about-info-image">
+                    <!-- Re-using the same image as requested -->
+                    <img src="assets/intro.jpg" alt="Restaurant Introduction">
+                </div>
+                <div class="about-info-content">
+                    <h2 class="section-title">A Taste of Tradition</h2>
+                    <h3>Fresh Ingredients, Timeless Flavor</h3>
+                    <p>Pasta is one of the most popular foods in the world today, available in an amazing range of shapes and flavours. It is incredibly versatile, and can be served in scores of different ways. Students love it for the energy it gives them at low cost, chefs delight in introducing light and healthy sauces for modern palates. Families favour bakes that can be cooked ahead and which will stretch to serve extra guests. It is the perfect choice for everyday and spur - of - the - moment meals.</p>
+                    <a href="menu.php" class="btn btn-secondary-outline">See Our Menu</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- === END Introduction Section === -->
+
+    <!-- === NEW: Category Slider Section (Replaces Popular Food) === -->
     <section class="popular-food-section section-padding bg-beige">
         <div class="container">
             <h2 class="section-title">Categories</h2>
@@ -141,7 +160,7 @@ $offer_result = $conn->query($offer_sql);
     </section>
     <!-- === END Category Slider Section === -->
 
-    <!-- About Info Section (Unchanged) -->
+        <!-- About Info Section (Unchanged) -->
     <section class="about-info-section section-padding bg-green-dark">
         <div class="container">
             <div class="about-info-grid">
@@ -182,25 +201,6 @@ $offer_result = $conn->query($offer_sql);
         </div>
     </section>
     <!-- === END OFFER SECTION === -->
-
-    <!-- === NEW: Introduction Section (Replaces Category Grid) === -->
-    <section class="about-info-section section-padding bg-green-dark">
-        <div class="container">
-            <div class="about-info-grid">
-                <div class="about-info-image">
-                    <!-- Re-using the same image as requested -->
-                    <img src="assets/about.jpg" alt="Restaurant Introduction">
-                </div>
-                <div class="about-info-content">
-                    <h2 class="section-title">A Taste of Tradition</h2>
-                    <h3>Fresh Ingredients, Timeless Flavor</h3>
-                    <p>Our philosophy is simple: use the best ingredients to create unforgettable food. We partner with local farmers to bring you a menu that's both classic and fresh, all prepared with passion by our expert chefs.</p>
-                    <a href="menu.php" class="btn btn-secondary-outline">See Our Menu</a>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- === END Introduction Section === -->
     
     <!-- === REMOVED: Special Section === -->
 

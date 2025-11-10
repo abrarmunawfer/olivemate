@@ -72,6 +72,13 @@ if (isset($conn) && $conn->ping()) {
         </li>
 
         <li class="sidebar-item">
+            <a href="offer_management.php" class="sidebar-link">
+                <i class="bi bi-gift-fill"></i>
+                <span>Offer Management</span>
+            </a>
+        </li>
+
+        <li class="sidebar-item">
             <a href="order_management.php" class="sidebar-link">
                 <i class="bi bi-box-seam-fill"></i>
                 <span>Order Management</span>
@@ -88,6 +95,13 @@ if (isset($conn) && $conn->ping()) {
         <li class="sidebar-item">
             <a href="testimonials.php" class="sidebar-link">
                  <i class="bi bi-chat-quote-fill"></i> <span>Testimonials</span>
+            </a>
+        </li>
+
+        <li class="sidebar-item">
+            <a href="chef_management.php" class="sidebar-link">
+                <i class="bi bi-person-fill-gear"></i>
+                <span>Chef Management</span>
             </a>
         </li>
 

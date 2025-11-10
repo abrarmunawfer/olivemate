@@ -458,12 +458,12 @@ img {
 .about-info-content h3 {
     font-family: var(--font-heading);
     font-size: 1.5rem;
-    color: var(--c-green-dark); /* Color from light bg */
+    color: var(--c-brown); /* Color from light bg */
     margin-bottom: 15px;
 }
 .about-info-content p {
     margin-bottom: 30px;
-    color: var(--c-dark-text); /* Color from light bg */
+    color: var(--c-light-color); /* Color from light bg */
 }
 .stats-counter { display: none; }
 
