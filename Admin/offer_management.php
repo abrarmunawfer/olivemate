@@ -3,37 +3,63 @@
 include 'includes/session.php';
 check_login(); // Redirect to index.php if not logged in
 
-// Include the header
 include 'includes/header.php';
+
+// Fetch all available foods for the dropdown
+$foods = [];
+$sql_foods = "SELECT id, name FROM foods WHERE status = 'available' ORDER BY name";
+$result_foods = $conn->query($sql_foods);
+if ($result_foods) {
+    while ($row = $result_foods->fetch_assoc()) {
+        $foods[] = $row;
+    }
+}
 ?>
 
-<!-- Floating "Add" Button -->
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 36px;
+        padding-left: 12px;
+        color: #212529;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+        right: 10px;
+    }
+    .select2-container--open {
+        z-index: 9999;
+    }
+    #offer-search-input::placeholder { font-size: 12px; opacity: 0.7; }
+</style>
+
+
 <button class="btn btn-primary btn-float" id="add-offer-btn" title="Add New Offer">
     <i class="bi bi-plus-lg"></i>
 </button>
 
-<!-- Page Title -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="page-title">Offer Management</h1>
 </div>
 
-<!-- Search Box -->
-<style>
-    #offer-search-input::placeholder { font-size: 12px; opacity: 0.7; }
-</style>
 <div class="mb-4">
     <input type="text" id="offer-search-input" class="form-control" 
            placeholder="Search by offer title..." 
            style="font-size: 12px;">
 </div>
 
-<!-- Offer Card Grid -->
 <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4" id="offer-list">
     <!-- Offers will be loaded here by AJAX -->
 </div>
 
-<!-- Add/Edit Offer Modal (Corrected) -->
-<div class="modal fade" id="offerModal" tabindex="-1" aria-labelledby="offerModalLabel" aria-hidden="true">
+<!-- Add/Edit Offer Modal -->
+<div class="modal fade" id="offerModal" aria-labelledby="offerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -46,6 +72,17 @@ include 'includes/header.php';
                     <input type="hidden" name="action" id="offer-action" value="add_offer">
                     <input type="hidden" name="offer_id" id="offer-id" value="">
                     
+                    <!-- Food Selector -->
+                    <div class="mb-3">
+                        <label for="offer-food-select" class="form-label">Select Food Item (Searchable)</label>
+                        <select class="form-select" id="offer-food-select" name="food_id" style="width: 100%;">
+                            <option value="">-- Select Item to Auto-fill --</option>
+                            <?php foreach ($foods as $food): ?>
+                                <option value="<?php echo $food['id']; ?>"><?php echo htmlspecialchars($food['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
                     <div class="mb-3">
                         <label for="offer-title" class="form-label">Offer Title</label>
                         <input type="text" class="form-control" id="offer-title" name="title" required>
@@ -68,7 +105,7 @@ include 'includes/header.php';
                     </div>
                     <div class="mb-3">
                         <label for="offer-price" class="form-label">Offer Price (€)</label>
-                        <input type="number" class="form-control" id="offer-price" name="offer_price" step="0.01" min="0" >
+                        <input type="number" class="form-control" id="offer-price" name="offer_price" step="0.01" min="0" style="background-color: #e9ecef;">
                     </div>
                     
                     <div class="mb-3">
@@ -82,6 +119,8 @@ include 'includes/header.php';
                     <div class="mb-3">
                         <label for="offer-image" class="form-label">Offer Image</label>
                         <input class="form-control" type="file" id="offer-image" name="image" accept="image/jpeg, image/png, image/gif, image/webp">
+                        <!-- Hidden field to store existing food image ID -->
+                        <input type="hidden" name="existing_image_id" id="existing-image-id" value="">
                     </div>
                     
                     <div class="mb-3 text-center">
@@ -99,21 +138,71 @@ include 'includes/header.php';
 </div>
 
 <?php
-// Include the footer
 include 'includes/footer.php';
 ?>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
-    $(document).ready(function() {
+$(document).ready(function() {
     const $offerList = $('#offer-list');
     const $modal = $('#offerModal');
     const $form = $('#offer-form');
     const $submitBtn = $('#offer-submit-btn');
+    const $foodSelect = $('#offer-food-select'); // The dropdown
 
     const $actualPrice = $('#offer-actual-price');
     const $percentage = $('#offer-percentage');
     const $offerPrice = $('#offer-price');
+    const $imagePreview = $('#image-preview');
+    const $existingImageId = $('#existing-image-id');
 
     let isCalculating = false;
+
+    // --- Initialize Select2 (Searchable Dropdown) ---
+    $foodSelect.select2({
+        dropdownParent: $('#offerModal'), // Attach to modal so it works inside
+        placeholder: "-- Select Item to Auto-fill --",
+        allowClear: true
+    });
+
+    // --- Helper: Fix Image Path ---
+    function fixImagePath(path) {
+        if (!path) return 'assets/images/placeholder.png';
+        // Remove Admin/ prefix if it exists so it renders correctly in Admin
+        return path.replace(/^Admin\//, '');
+    }
+
+    // --- Auto-Fill Logic ---
+    $foodSelect.on('change', function() {
+        const foodId = $(this).val();
+        if (foodId) {
+            $.ajax({
+                url: 'ajax/offer_action.php',
+                type: 'POST',
+                data: { action: 'fetch_food_details', food_id: foodId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        const food = response.data;
+                        $('#offer-title').val(food.name);
+                        $('#offer-description').val(food.description);
+                        $('#offer-actual-price').val(food.price);
+                        
+                        $imagePreview.attr('src', fixImagePath(food.image_path)).show();
+                        
+                        $existingImageId.val(food.img_id); 
+                        
+                        $('#offer-percentage').val('');
+                        $('#offer-price').val('');
+                    }
+                }
+            });
+        } else {
+            $existingImageId.val(''); 
+        }
+    });
 
     function loadOffers(searchTerm = '') {
         $offerList.html('<div class="col-12 text-center"><span class="spinner-border" role="status"></span><p>Loading offers...</p></div>');
@@ -147,7 +236,7 @@ include 'includes/footer.php';
                         const cardHtml = `
                             <div class="col" data-id="${item.id}">
                                 <div class="card item-card">
-                                    <img src="${item.image_path}" class="card-img-top item-card-img-top" alt="${item.title}">
+                                    <img src="${fixImagePath(item.image_path)}" class="card-img-top item-card-img-top" alt="${item.title}">
                                     <div class="card-body">
                                         <h5 class="card-title">${item.title}</h5>
                                         ${priceHtml}
@@ -183,15 +272,18 @@ include 'includes/footer.php';
     $('#add-offer-btn').on('click', function() {
         window.resetModalForm('offerModal', 'offer-form', 'add_offer');
         $('#offerModalLabel').text('Add Offer');
+        $foodSelect.val('').trigger('change');
         $('#offer-actual-price').val('');
         $('#offer-percentage').val('');
         $('#offer-price').val('');
-        $('#image-preview').attr('src', 'assets/images/placeholder.png').hide();
+        $existingImageId.val('');
+        $imagePreview.attr('src', 'assets/images/placeholder.png').hide();
         $modal.modal('show');
     });
 
     $('#offer-image').on('change', function() {
         window.previewImage(this, '#image-preview');
+        $existingImageId.val(''); 
     });
 
     $form.on('submit', function(e) {
@@ -239,6 +331,13 @@ include 'includes/footer.php';
                 if (response.status === 'success') {
                     var item = response.data;
                     $('#offer-id').val(item.id);
+                    
+                    if (item.food_id) {
+                        $foodSelect.val(item.food_id).trigger('change.select2'); 
+                    } else {
+                        $foodSelect.val('').trigger('change');
+                    }
+
                     $('#offer-title').val(item.title);
                     $('#offer-description').val(item.description);
                     $('#offer-status').val(item.status);
@@ -247,15 +346,16 @@ include 'includes/footer.php';
                     $('#offer-percentage').val(item.offer_percentage);
                     $('#offer-price').val(item.offer_price);
                     
-                    $('#image-preview').attr('src', item.image_path).show();
-                    
+                    $imagePreview.attr('src', fixImagePath(item.image_path)).show();
+                    $existingImageId.val(item.img_id);
+
                     $modal.modal('show');
                 } else {
                     window.showErrorModal(response.message);
                 }
             },
             error: function() {
-                window.showErrorModal('Failed to fetch offer details.');
+                window.showErrorModal('Failed to fetch details.');
             }
         });
     });
@@ -286,10 +386,8 @@ include 'includes/footer.php';
     function calculatePriceFromPercentage() {
         if (isCalculating) return;
         isCalculating = true;
-        
         const actualPrice = parseFloat($actualPrice.val());
         const percentage = parseFloat($percentage.val());
-        
         if (!isNaN(actualPrice) && !isNaN(percentage) && percentage >= 0 && percentage <= 100) {
             const discount = (actualPrice * percentage) / 100;
             const offerPrice = actualPrice - discount;
@@ -305,10 +403,8 @@ include 'includes/footer.php';
     function calculatePercentageFromPrice() {
         if (isCalculating) return;
         isCalculating = true;
-
         const actualPrice = parseFloat($actualPrice.val());
         const offerPrice = parseFloat($offerPrice.val());
-
         if (!isNaN(actualPrice) && !isNaN(offerPrice) && actualPrice > 0 && offerPrice <= actualPrice && offerPrice >= 0) {
             const discount = actualPrice - offerPrice;
             const percentage = (discount / actualPrice) * 100;

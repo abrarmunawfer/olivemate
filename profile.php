@@ -1,160 +1,386 @@
 <?php
-// Use the correct path for customer_session.php
 include 'connection/customer_session.php';
-check_customer_login(); // MUST be logged in
+check_customer_login(); 
 
-// Use the correct path for header.php
 include 'includes/header.php';
 
-// Use null coalescing for safety
 $username = $_SESSION['customer_username'] ?? 'Customer';
 $email = $_SESSION['customer_email'] ?? '';
-$user_id = $_SESSION['customer_id'] ?? 0; // Get user ID for testimonial form
+$user_id = $_SESSION['customer_id'] ?? 0; 
 ?>
 
 <style>
-    /* ---
-   Modern & Responsive Profile Page (Rebuild)
-   --- */
+    /* --- Variables --- */
+    :root {
+        --c-green-dark: #343F35;
+        --c-beige: #F5F0E9;
+        --c-brown: #B18959;
+        --c-light-color: #FFFFFF;
+        --c-dark-text: #333333;
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Poppins', sans-serif;
+        --border-color: #e0d9d0;
+    }
 
-/* Base container (card look) */
-.profile-container {
-    display: grid;
-    grid-template-columns: 1fr; /* Mobile-first: tabs on top */
-    background: var(--light-color);
-    border-radius: 15px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    margin-top: 20px;
+    /* Order Tracking */
+.order-track-item {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
 }
-
-/* Tab bar (mobile) */
-.profile-tabs {
+.order-track-header {
     display: flex;
-    flex-direction: row; /* Horizontal row */
-    justify-content: space-around; /* Spread icons out */
-    padding: 5px 0;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+.order-track-status {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-green);
+}
+.order-progress-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100px;
+    z-index: 2;
+}
+.progress-step .step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.4s ease;
+}
+.progress-step .step-label {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #999;
+    transition: all 0.4s ease;
+}
+.progress-step.completed .step-icon {
+    background-color: var(--primary-green);
+    color: var(--light-color);
+}
+.progress-step.completed .step-label { color: var(--dark-color); }
+.progress-line {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: var(--border-color);
+    z-index: 1;
+    transform: translateY(-50%);
+}
+.progress-line-inner {
+    height: 100%;
+    width: 0%; /* Updated by JS */
+    background-color: var(--primary-green);
+    transition: width 0.5s ease;
+}
+.no-orders { text-align: center; }
+
+    /* --- Page Layout --- */
+    .section-padding { padding: 60px 0; background-color: var(--c-beige); min-height: 90vh; }
+    .section-title {
+        font-family: var(--font-heading);
+        font-size: 2.2rem;
+        color: var(--c-green-dark);
+        text-align: center;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    .lead { text-align: center; color: #666; margin-bottom: 30px; font-size: 1rem; }
+    #profile-welcome-username { color: var(--c-brown); font-weight: 600; }
+
+    /* --- Profile Container --- */
+    .profile-container {
+        background: var(--c-light-color);
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column; /* Mobile: Stacked */
+    }
+
+    /* --- Mobile Tabs (Top Bar) --- */
+    .profile-tabs {
+        display: flex;
+        background-color: #f9f9f9;
+        border-bottom: 1px solid var(--border-color);
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .tab-link {
+        flex: 1;
+        padding: 12px 15px;
+        border: none;
+        background: none;
+        cursor: pointer;
+        text-align: center;
+        color: #777;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .tab-link i { font-size: 1.1rem; margin-bottom: 4px; }
+    .tab-link span { display: none; } /* Hide text on mobile to save space */
+
+    .tab-link.active {
+        background-color: #fff;
+        color: var(--c-green-dark);
+        border-bottom: 3px solid var(--c-green-dark);
+    }
+
+    /* --- Content Area --- */
+    .profile-content { padding: 25px; flex-grow: 1; min-height: 400px; }
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    h4 {
+        font-family: var(--font-heading);
+        color: var(--c-green-dark);
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    /* --- Tracking Animation Styles --- */
+    .order-track-item {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+    
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        font-weight: 600;
+        color: var(--c-dark-text);
+    }
+
+    /* The Progress Bar */
+    .track-progress {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .track-step {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 25%;
+        z-index: 2;
+    }
+    
+    .step-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background-color: #eee;
+        color: #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.4s ease;
+    }
+    
+    .step-text {
+        font-size: 0.75rem;
+        color: #999;
+        margin-top: 8px;
+        font-weight: 500;
+    }
+
+    /* Active Step Styles */
+    .track-step.active .step-icon {
+        background-color: var(--c-green-dark);
+        color: #fff;
+        transform: scale(1.1);
+    }
+    .track-step.active .step-text {
+        color: var(--c-green-dark);
+        font-weight: 700;
+    }
+
+    /* Connecting Line */
+    .progress-line-bg {
+        position: absolute;
+        top: 17px;
+        left: 12%;
+        width: 76%;
+        height: 3px;
+        background-color: #eee;
+        z-index: 1;
+    }
+    .progress-line-fill {
+        position: absolute;
+        top: 17px;
+        left: 12%;
+        height: 3px;
+        background-color: var(--c-green-dark);
+        z-index: 1;
+        width: 0%; /* JS will change this */
+        transition: width 0.5s ease;
+    }
+
+    /* --- Desktop Layout --- */
+    @media (min-width: 768px) {
+        .profile-container {
+            flex-direction: row; /* Sidebar Layout */
+        }
+        .profile-tabs {
+            flex-direction: column;
+            width: 240px; /* Compact Width */
+            border-bottom: none;
+            border-right: 1px solid var(--border-color);
+            background-color: #fff;
+            padding: 20px 0;
+        }
+        .tab-link {
+            flex-direction: row;
+            justify-content: flex-start;
+            padding: 12px 20px; /* Smaller padding */
+            margin-bottom: 2px;
+            border-bottom: none;
+            border-left: 4px solid transparent;
+            font-size: 0.9rem;
+            color: var(--c-dark-text);
+        }
+        .tab-link i { 
+            margin-right: 12px; 
+            margin-bottom: 0; 
+            width: 20px; 
+            text-align: center; 
+            font-size: 1rem;
+        }
+        .tab-link span { display: inline; }
+
+        /* Active Sidebar Item */
+        .tab-link.active {
+            background-color: #f4f8f4; /* Very light green tint */
+            color: var(--c-green-dark);
+            border-left: 4px solid var(--c-brown);
+            border-bottom: none;
+            font-weight: 600;
+        }
+        .tab-link:hover:not(.active) {
+            background-color: #f9f9f9;
+        }
+        
+        .profile-content { padding: 40px; }
+    }
+
+
+    /* Order History */
+.order-history-item {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.order-history-details { font-size: 0.9rem; }
+.order-history-details strong { font-size: 1.1rem; }
+.order-history-status {
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+.status-done { background-color: #d4edda; color: #155724; }
+.status-cancelled { background-color: #f8d7da; color: #721c24; }
+
+.profile-tabs-container {
+    background-color: var(--light-color);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    margin-top: 20px;
+    overflow: hidden; /* Fix for radius */
+}
+.profile-nav-tabs {
     border-bottom: 1px solid var(--border-color);
     background-color: var(--light-bg);
-    overflow-x: auto; /* Allow scrolling if too many tabs */
+    padding: 5px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
-
-/* Tab buttons (mobile) */
-.tab-link {
-    display: flex;
-    flex-direction: column; /* Icon on top of text */
-    justify-content: center;
-    align-items: center;
-    padding: 12px 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--dark-color);
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
-    flex-shrink: 0; /* Prevent icons from shrinking */
-}
-.tab-link i {
-    font-size: 1.4rem;
-    margin-right: 0;
-    margin-bottom: 5px;
-}
-.tab-link span {
-    display: none; /* HIDE text on mobile */
-    font-size: 0.75rem;
+.profile-nav-tabs .nav-link {
+    color: var(--c-dark-text);
     font-weight: 500;
+    border: none;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
 }
-.tab-link.active {
-    color: var(--c-green-dark);
-    border-bottom-color: var(--c-green-dark);
-    background-color: transparent;
-    box-shadow: none;
+.profile-nav-tabs .nav-link:hover {
+    border-color: #e9ecef;
+    color: var(--c-dark-text);
 }
-.tab-link:not(.active):hover {
-     background-color: #e9e9e9;
-     border-bottom-color: #ddd;
+.profile-nav-tabs .nav-link.active {
+    color: var(--c-green-dark) !important;
+    background-color: transparent !important;
+    border-color: var(--c-green-dark) !important;
+    border-bottom-width: 3px;
+}
+.profile-tab-content {
+    background-color: var(--light-color);
+}
+.profile-tab-content .tab-pane {
+    animation: fadeIn 0.5s ease-in-out;
 }
 
-/* Content Area */
-.profile-content {
-    padding: 20px;
-}
-.tab-content { display: none; } /* Hide all tabs by default */
-.tab-content.active { 
-    display: block; 
-    animation: fadeIn 0.5s ease-in-out;
-} 
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
 }
-.tab-content h4 {
-    font-family: var(--font-heading); 
-    margin-bottom: 25px; 
-    color: var(--dark-color);
+.account-details-info div {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+.account-details-info strong {
+    min-width: 100px;
+    display: inline-block;
+    color: var(--c-dark-text);
 }
 
-/* --- Desktop Layout (Tablet & Up) --- */
-@media (min-width: 768px) {
-    .profile-container {
-        /* 2-column grid for desktop */
-        grid-template-columns: 280px 1fr; /* Sidebar and content */
-        gap: 0;
-        min-height: 60vh;
-    }
 
-    /* Sidebar (desktop) */
-    .profile-tabs {
-        flex-direction: column; /* Stack tabs vertically */
-        justify-content: flex-start;
-        padding: 20px;
-        border-bottom: none;
-        border-right: 1px solid var(--border-color);
-        overflow-x: hidden; /* No scrolling on desktop */
-    }
-
-    /* Tab buttons (desktop) */
-    .tab-link {
-        flex-direction: row; /* Icon and text side-by-side */
-        justify-content: flex-start;
-        text-align: left;
-        width: 100%;
-        padding: 15px 20px;
-        border-radius: 10px;
-        margin-bottom: 10px;
-        font-size: 12px;
-        border-bottom: none; /* Remove bottom border */
-    }
-    .tab-link i {
-        font-size: 12px;
-        margin-bottom: 0;
-        margin-right: 15px;
-    }
-    .tab-link span {
-        display: inline; /* SHOW text on desktop */
-        font-size: 12px;
-    }
-    .tab-link.active {
-        background-color: var(--primary-green);
-        color: var(--light-color); /* <<<<< FIX: WHITE TEXT on active */
-        box-shadow: 0 4px 10px rgba(76, 107, 34, 0.3);
-        border-bottom-color: transparent;
-    }
-    .tab-link.active:hover {
-        background-color: var(--primary-green);
-        color: var(--light-color); /* <<<<< FIX: WHITE TEXT on active hover */
-    }
-     .tab-link:not(.active):hover {
-        background-color: #e9e9e9;
-        border-bottom-color: transparent;
-        color: var(--dark-color);
-    }
-
-    /* Content Area (desktop) */
-    .profile-content {
-        padding: 30px;
-    }
-}
 </style>
 
 <main class="section-padding">

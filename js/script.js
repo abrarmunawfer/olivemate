@@ -1,11 +1,6 @@
 $(document).ready(function() {
 
-    // --- Mobile Menu Toggle ---
-    $('.menu-toggle').click(function() {
-        $('.nav-links').toggleClass('active');
-        // You might need to add icon toggling logic here if it's missing
-        // e.g., $(this).find('i').toggleClass('fa-bars fa-xmark');
-    });
+
 
     // --- Popular Food Slider ---
     const sliderWrapper = $('.slider-wrapper');

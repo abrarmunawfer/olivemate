@@ -52,124 +52,216 @@ if ($stmt_chefs && $stmt_chefs->execute()) {
 }
 ?>
 
-<!--
-============================================================
-== Page-Specific CSS
-============================================================
--->
 <style>
-/* Hero Grid Style (single image) */
-.hero-grid-container {
-    position: relative;
-    padding: 1.5rem; /* This creates the "gaps" */
-    background-color: var(--c-beige);
-    height: 50vh; /* Shorter height for inner pages */
-    display: flex; /* Use flex for single item */
-    align-items: stretch;
-    justify-content: stretch;
-}
-.hero-item-single {
-    flex-grow: 1; /* Make item fill the space */
-    overflow: hidden;
-    border-radius: 10px; /* Rounded corners */
-}
-.hero-item-single img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-/* Centered Content (re-using from index.php styles) */
-.cover-content-center {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    color: var(--c-light-color);
-    padding: 20px;
-    z-index: 10;
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
-}
-.cover-content-center h1 {
-    font-size: 3.5rem;
-    font-family: var(--font-heading);
-    font-weight: 700;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-}
+    :root {
+        --c-green-dark: #343F35;
+        --c-beige: #F5F0E9;
+        --c-brown: #B18959;
+        --c-light-color: #FFFFFF;
+        --c-dark-text: #333333;
+        --c-light-text: #f1f1f1;
+        --shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Poppins', sans-serif;
+        --border-color: #e0d9d0;
+    }
 
-/* Chef Card styles */
-.chefs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-}
-.chef-card {
-    text-align: center;
-    background: var(--c-light-color);
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: var(--shadow);
-    transition: transform 0.3s ease;
-}
-.chef-card:hover {
-    transform: translateY(-5px);
-}
-.chef-card img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin: 0 auto 20px;
-    border: 4px solid var(--border-color);
-}
-.chef-card h4 {
-    font-family: var(--font-heading);
-    font-size: 1.4rem;
-    color: var(--c-dark-text);
-    margin-bottom: 5px;
-}
-.chef-card span {
-    font-size: 0.9rem;
-    color: var(--c-brown); /* Themed color */
+    .btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 50px; 
     font-weight: 600;
-    display: block;
-    margin-bottom: 15px;
-}
-.chef-card p {
+    text-transform: uppercase;
     font-size: 0.9rem;
-    color: var(--c-text);
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+    text-align: center;
 }
 
-/* Responsive */
-@media (max-width: 992px) {
-    .hero-grid-container {
-        height: 45vh;
+.btn-primary {
+    background-color: var(--c-brown) !important; 
+    border-color: var(--c-brown) !important;
+    color: var(--c-light-color) !important;
+}
+
+.btn-primary:hover {
+    background-color: #c99a6b !important; 
+    border-color: #c99a6b !important;
+    transform: translateY(-2px);
+    color: #fff !important;
+}
+
+.btn-secondary-outline {
+    background-color: transparent;
+    border: 2px solid var(--c-brown);
+    color: var(--c-brown);
+}
+
+.btn-secondary-outline:hover {
+    background-color: var(--c-brown);
+    color: var(--c-light-color);
+    transform: translateY(-2px);
+}
+
+
+    .section-padding { padding: 80px 0; }
+    
+    .bg-green-dark { 
+        background-color: var(--c-green-dark); 
+        color: var(--c-light-text); 
     }
-    .cover-content-center h1 {
+    .bg-green-dark h2, .bg-green-dark h3 { color: var(--c-light-color); }
+    
+    .bg-beige { background-color: var(--c-beige); }
+
+    .section-title {
+        font-family: var(--font-heading);
         font-size: 2.5rem;
+        color: var(--c-green-dark);
+        text-align: center;
+        margin-bottom: 50px;
+        font-weight: 700;
     }
-}
-@media (max-width: 576px) {
+    .bg-green-dark .section-title { color: var(--c-light-color); }
+
     .hero-grid-container {
-        height: 35vh;
-        padding: 1rem; /* Smaller "gaps" on mobile */
+        position: relative;
+        padding: 1.5rem;
+        background-color: var(--c-beige);
+        height: 50vh;
+        display: flex;
+        align-items: stretch;
+        justify-content: stretch;
     }
-     .cover-content-center h1 {
-        font-size: 2rem;
+
+    .hero-item-single {
+        flex-grow: 1;
+        overflow: hidden;
+        border-radius: 10px;
+        position: relative;
     }
-}
+
+    .hero-item-single img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .cover-content-center {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: var(--c-light-color);
+        z-index: 10;
+        background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+    }
+
+    .cover-content-center h1 {
+        font-size: 3.5rem;
+        font-family: var(--font-heading);
+        font-weight: 700;
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+    }
+
+    .about-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+        align-items: center;
+    }
+
+    .about-info-image img {
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        width: 100%;
+    }
+
+    .about-info-content h2.section-title { text-align: left; margin-bottom: 20px; }
+    
+    .about-info-content h3 {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        color: var(--c-brown);
+        margin-bottom: 15px;
+    }
+    
+    .about-info-content p { margin-bottom: 20px; line-height: 1.8; opacity: 0.9; }
+
+    .chefs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+    }
+
+    .chef-card {
+        background: var(--c-light-color);
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: var(--shadow);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .chef-card:hover { transform: translateY(-5px); }
+
+    .chef-card img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 20px;
+        border: 4px solid var(--border-color);
+    }
+
+    .chef-card h4 {
+        font-family: var(--font-heading);
+        font-size: 1.4rem;
+        color: var(--c-dark-text);
+        margin-bottom: 5px;
+    }
+
+    .chef-card span {
+        font-size: 0.9rem;
+        color: var(--c-brown);
+        font-weight: 600;
+        display: block;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+    }
+
+    .chef-card p {
+        font-size: 0.9rem;
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .no-content-message {
+        text-align: center;
+        width: 100%;
+        grid-column: 1 / -1;
+        padding: 20px;
+        font-style: italic;
+        color: #777;
+    }
+
+    @media (max-width: 992px) {
+        .about-info-grid { grid-template-columns: 1fr; text-align: center; }
+        .about-info-content h2.section-title { text-align: center; }
+        .hero-grid-container { height: 40vh; }
+    }
+
+    @media (max-width: 576px) {
+        .cover-content-center h1 { font-size: 2rem; }
+        .hero-grid-container { height: 35vh; padding: 1rem; }
+    }
 </style>
 
-<!--
-============================================================
-== Page HTML Content
-============================================================
--->
 <main>
 
     <!-- === UPDATED: Single Image Hero Grid === -->

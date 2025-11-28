@@ -1,14 +1,13 @@
 <?php
-include 'connection/conn.php'; // Include DB connection first
-include 'includes/header.php'; // Includes head, nav, potentially starts session
+include 'connection/conn.php'; 
+include 'includes/header.php'; 
 
-// --- Placeholder Image URLs ---
+
 $placeholder_img_food = 'Admin/assets/images/placeholder.png';
 $placeholder_img_other = 'https://via.placeholder.com/600x400.png?text=Image+Not+Found';
-$default_cover = 'assets/cover/cover.jpg'; // Default cover if none found
-$company_name = "OliveMate"; // Default company name
+$default_cover = 'assets/cover/cover.jpg'; 
+$company_name = "OliveMate"; 
 
-// --- Database Queries ---
 
 // Fetch Company Name
 $company_name_query = $conn->query("SELECT company_name FROM company_profile WHERE id = 1 LIMIT 1");
@@ -42,7 +41,7 @@ while (count($cover_images) < 3) {
     $cover_images[] = $default_cover;
 }
 
-// === UPDATED: Fetch Categories (Limit 6 for slider) ===
+// Fetch Categories 
 $category_sql = "
     SELECT c.id, c.name, m.image_path
     FROM categories AS c
@@ -53,11 +52,7 @@ $category_sql = "
 ";
 $category_result = $conn->query($category_sql);
 
-// === REMOVED: Popular Food SQL ===
-
-// === REMOVED: Special Dishes SQL ===
-
-// Fetch Visible Testimonials (Limit 3 for a grid)
+// Fetch Visible Testimonials
 $testimonial_sql = "
     SELECT customer_name, testimonial_text, rating
     FROM testimonials
@@ -67,9 +62,9 @@ $testimonial_sql = "
 ";
 $testimonial_result = $conn->query($testimonial_sql);
 
-// Fetch Active Offers (Limit 2)
+// Fetch Active Offers
 $offer_sql = "
-    SELECT o.title, o.description, m.image_path
+    SELECT o.title, o.description, o.food_id, o.offer_price, m.image_path
     FROM offers AS o
     LEFT JOIN mate_image AS m ON o.img_id = m.id
     WHERE o.status = 'active'
@@ -80,9 +75,383 @@ $offer_result = $conn->query($offer_sql);
 
 ?>
 
+<style>
+
+    :root {
+    --c-green-dark: #343F35;
+    --c-beige: #F5F0E9;
+    --c-brown: #B18959;
+    --c-light-color: #FFFFFF;
+    --c-dark-text: #333333;
+    --c-light-text: #f1f1f1;
+    --shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Poppins', sans-serif;
+    --border-color: #e0d9d0;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 50px; 
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: var(--c-brown) !important; 
+    border-color: var(--c-brown) !important;
+    color: var(--c-light-color) !important;
+}
+
+.btn-primary:hover {
+    background-color: #c99a6b !important; 
+    border-color: #c99a6b !important;
+    transform: translateY(-2px);
+    color: #fff !important;
+}
+
+.btn-secondary-outline {
+    background-color: transparent;
+    border: 2px solid var(--c-brown);
+    color: var(--c-brown);
+}
+
+.btn-secondary-outline:hover {
+    background-color: var(--c-brown);
+    color: var(--c-light-color);
+    transform: translateY(-2px);
+}
+
+/* --- Layout & Utilities --- */
+.section-padding {
+    padding: 100px 0;
+}
+
+.bg-green-dark {
+    background-color: var(--c-green-dark);
+    color: var(--c-light-text);
+}
+
+.bg-green-dark .section-title,
+.bg-green-dark h3 {
+    color: var(--c-light-color);
+}
+
+.bg-green-dark p {
+    color: #ccc;
+}
+
+.bg-beige {
+    background-color: var(--c-beige);
+}
+
+.section-title {
+    font-family: var(--font-heading);
+    font-size: 2.8rem;
+    color: var(--c-green-dark);
+    text-align: center;
+    margin-bottom: 60px;
+    font-weight: 700;
+}
+
+/* --- Hero Grid Section --- */
+.hero-grid-container {
+    position: relative;
+    padding: 1.5rem;
+    background-color: var(--c-beige);
+    height: 90vh;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1.5rem;
+    height: 100%;
+}
+
+.hero-item {
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.hero-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hero-item:hover img {
+    transform: scale(1.05);
+}
+
+.hero-item-1 { grid-column: 1 / 2; grid-row: 1 / 3; }
+.hero-item-2 { grid-column: 2 / 3; grid-row: 1 / 2; }
+.hero-item-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
+
+.cover-content-center {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--c-light-color);
+    padding: 20px;
+    z-index: 10;
+    background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+    pointer-events: none; 
+}
+.cover-content-center a { pointer-events: auto; }
+
+.cover-content-center h1 {
+    font-size: 3.5rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+.cover-content-center p {
+    font-size: 1.4rem;
+    margin-bottom: 30px;
+    color: #eee;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* --- About/Intro Section --- */
+.about-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+}
+
+.about-info-image img {
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    height: 70vh;
+}
+
+.about-info-content h2.section-title {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.about-info-content h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--c-brown);
+    margin-bottom: 15px;
+}
+
+.about-info-content p {
+    margin-bottom: 30px;
+    line-height: 1.8;
+}
+
+/* --- Category Slider --- */
+.slider-container { position: relative; }
+
+.slider-wrapper {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding-bottom: 20px;
+    scrollbar-width: none;
+}
+.slider-wrapper::-webkit-scrollbar { display: none; }
+
+.food-card {
+    flex: 0 0 300px;
+    margin-right: 25px;
+    background-color: var(--c-light-color);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.food-card:hover {
+    transform: translateY(-5px);
+}
+
+.food-card-img-link {
+    height: 200px;
+    overflow: hidden;
+    display: block;
+}
+
+.food-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.food-card:hover img { transform: scale(1.05); }
+
+.food-card-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.food-card-content h4 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    color: var(--c-dark-text);
+    margin-bottom: 10px;
+}
+
+.food-card-content .btn { width: 100%; text-align: center; }
+
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--c-light-color);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 45px; height: 45px;
+    font-size: 1.2rem;
+    color: var(--c-dark-text);
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+.slider-btn:hover {
+    background-color: var(--c-brown);
+    color: var(--c-light-color);
+    border-color: var(--c-brown);
+}
+.prev-btn { left: -20px; }
+.next-btn { right: -20px; }
+
+/* --- Offer Section --- */
+.offer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.offer-card {
+    border-radius: 15px;
+    padding: 40px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    color: var(--c-light-color);
+    box-shadow: var(--shadow);
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+}
+
+.offer-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+.offer-content {
+    position: relative;
+    z-index: 2;
+    max-width: 70%;
+}
+
+.offer-content h3 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    line-height: 1.3;
+    margin-bottom: 15px;
+}
+
+.offer-content p {
+    margin-bottom: 20px;
+    color: #f1f1f1;
+}
+
+/* --- Testimonials --- */
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.testimonial-card {
+    background-color: var(--c-light-color);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.testimonial-card .rating {
+    color: #f39c12;
+    margin-bottom: 20px;
+}
+
+.testimonial-card p {
+    font-style: italic;
+    margin-bottom: 15px;
+    color: var(--c-dark-text);
+}
+
+.testimonial-card h4 {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    color: var(--c-green-dark);
+}
+
+/* --- Responsive --- */
+@media (max-width: 992px) {
+    .section-padding { padding: 60px 0; }
+    .section-title { font-size: 2.2rem; }
+    .hero-grid-container { height: 70vh; padding: 1rem; }
+    .hero-grid { gap: 1rem; }
+    .about-info-grid { grid-template-columns: 1fr; gap: 30px; text-align: center; }
+    .about-info-content h2.section-title { text-align: center; }
+}
+
+@media (max-width: 768px) {
+    .hero-grid-container { height: auto; }
+    .hero-grid { grid-template-columns: 1fr; grid-template-rows: 40vh 30vh 30vh; }
+    .hero-item-1 { grid-column: 1 / 2; grid-row: 1 / 2; }
+    .hero-item-2 { grid-column: 1 / 2; grid-row: 2 / 3; }
+    .hero-item-3 { grid-column: 1 / 2; grid-row: 3 / 4; }
+    
+    .cover-content-center h1 { font-size: 2rem; }
+    
+    .slider-btn { display: none; }
+    .food-card { flex: 0 0 260px; margin-right: 15px; }
+    
+    .offer-grid { grid-template-columns: 1fr; }
+    .offer-content { max-width: 100%; }
+}
+</style>
+
 <main>
 
-    <!-- === Hero Grid Section (Unchanged) === -->
+    <!-- === Hero Grid Section  === -->
     <section class="hero-grid-container">
         <div class="hero-grid">
             <div class="hero-item hero-item-1">
@@ -103,12 +472,11 @@ $offer_result = $conn->query($offer_sql);
     </section>
     <!-- === END Hero Grid Section === -->
 
-    <!-- === NEW: Introduction Section (Replaces Category Grid) === -->
+    <!-- Introduction Section (Replaces Category Grid) === -->
     <section class="about-info-section section-padding bg-green-dark">
         <div class="container">
             <div class="about-info-grid">
                 <div class="about-info-image">
-                    <!-- Re-using the same image as requested -->
                     <img src="assets/intro.jpg" alt="Restaurant Introduction">
                 </div>
                 <div class="about-info-content">
@@ -122,7 +490,7 @@ $offer_result = $conn->query($offer_sql);
     </section>
     <!-- === END Introduction Section === -->
 
-    <!-- === NEW: Category Slider Section (Replaces Popular Food) === -->
+    <!-- === Category Slider Section  === -->
     <section class="popular-food-section section-padding bg-beige">
         <div class="container">
             <h2 class="section-title">Categories</h2>
@@ -132,14 +500,12 @@ $offer_result = $conn->query($offer_sql);
                         <?php while($category = $category_result->fetch_assoc()):
                             $image_path_cat = $category['image_path'] ? 'Admin/' . $category['image_path'] : $placeholder_img_food;
                         ?>
-                            <!-- We re-use the "food-card" style for the category slider -->
                             <div class="food-card">
                                 <a href="category.php?id=<?php echo $category['id']; ?>" class="food-card-img-link">
                                     <img src="<?php echo htmlspecialchars($image_path_cat); ?>" alt="<?php echo htmlspecialchars($category['name']); ?>">
                                 </a>
                                 <div class="food-card-content">
                                     <h4><?php echo htmlspecialchars($category['name']); ?></h4>
-                                    <!-- This div provides spacing to match other cards -->
                                     <div class="price" style="visibility: hidden;">&nbsp;</div> 
                                     <a href="category.php?id=<?php echo $category['id']; ?>" class="btn btn-primary">
                                         View All
@@ -151,7 +517,7 @@ $offer_result = $conn->query($offer_sql);
                         <p class="no-content-message">No categories available at the moment.</p>
                     <?php endif; ?>
                 </div>
-                <?php if ($category_result && $category_result->num_rows > 3): // Show buttons if scrollable ?>
+                <?php if ($category_result && $category_result->num_rows > 3):  ?>
                     <button class="slider-btn prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
                     <button class="slider-btn next-btn"><i class="fa-solid fa-chevron-right"></i></button>
                 <?php endif; ?>
@@ -160,7 +526,7 @@ $offer_result = $conn->query($offer_sql);
     </section>
     <!-- === END Category Slider Section === -->
 
-        <!-- About Info Section (Unchanged) -->
+        <!-- About Info Section -->
     <section class="about-info-section section-padding bg-green-dark">
         <div class="container">
             <div class="about-info-grid">
@@ -177,7 +543,7 @@ $offer_result = $conn->query($offer_sql);
         </div>
     </section>
 
-    <!-- === OFFER SECTION (Unchanged) === -->
+    <!-- === OFFER SECTION === -->
     <section class="offer-section section-padding bg-beige">
         <div class="container">
             <h2 class="section-title">Today's Offers</h2>
@@ -186,13 +552,27 @@ $offer_result = $conn->query($offer_sql);
                     <?php while($offer = $offer_result->fetch_assoc()):
                          $image_path_offer = $offer['image_path'] ? 'Admin/' . $offer['image_path'] : $placeholder_img_other;
                     ?>
-                        <div class="offer-card" style="background-image: url('<?php echo htmlspecialchars($image_path_offer); ?>');">
-                            <div class="offer-content">
-                                <h3><?php echo htmlspecialchars($offer['title']); ?></h3>
-                                <p><?php echo htmlspecialchars($offer['description'] ?? ''); ?></p>
-                                <a href="menu.php" class="btn btn-primary">Order Now</a>
-                            </div>
+                    <div class="offer-card" style="background-image: url('<?php echo htmlspecialchars($image_path_offer); ?>');">
+                        <div class="offer-content">
+                            <h3><?php echo htmlspecialchars($offer['title']); ?></h3>
+                            <p><?php echo htmlspecialchars($offer['description'] ?? ''); ?></p>
+
+                            <?php if ($is_customer_logged_in): ?>
+                                <button class="btn btn-primary add-to-cart-btn"
+                                        data-id="<?php echo $offer['food_id']; ?>" 
+                                        data-name="<?php echo htmlspecialchars($offer['title']); ?>" 
+                                        data-price="<?php echo $offer['offer_price']; ?>"
+                                        data-image="<?php echo htmlspecialchars($image_path_offer); ?>">
+                                    Order Now <span style="font-size:0.8em">for €<?php echo $offer['offer_price']; ?></span>
+                                </button>
+                            <?php else: ?>
+                                <a href="login.php" class="btn btn-primary">
+                                    Order Now <span style="font-size:0.8em">for €<?php echo $offer['offer_price']; ?></span>
+                                </a>
+                            <?php endif; ?>
+
                         </div>
+                    </div>
                     <?php endwhile; ?>
                 <?php else: ?>
                     <p class="no-content-message">No offers available today. Check back soon!</p>
@@ -202,9 +582,9 @@ $offer_result = $conn->query($offer_sql);
     </section>
     <!-- === END OFFER SECTION === -->
     
-    <!-- === REMOVED: Special Section === -->
+    <!-- ===Special Section === -->
 
-    <!-- Testimonial Section (Unchanged) -->
+    <!-- Testimonial Section -->
     <section class="testimonial-section section-padding bg-beige">
         <div class="container">
             <h2 class="section-title">What Our Customers Say</h2>
@@ -233,10 +613,8 @@ $offer_result = $conn->query($offer_sql);
 </main>
 
 <?php
-// Include the footer
 include 'includes/footer.php';
 
-// Close the database connection
 if ($conn) {
     $conn->close();
 }
